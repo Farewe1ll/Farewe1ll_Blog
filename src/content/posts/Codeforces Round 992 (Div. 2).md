@@ -5,7 +5,7 @@ updated: 2025-01-14T13:26:32+08:00 #更新时间
 tags: [Codeforces, Div. 2, cpp, Virtual Participation]
 description: "Codeforces Round 992 (Div. 2) VP 解题报告" #描述
 image: ''
-category: '算法'
+category: 'Algorithm'
 draft: false # 是否为草稿
 series: "Codeforces"
 ---

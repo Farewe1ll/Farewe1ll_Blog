@@ -5,7 +5,7 @@ updated: 2025-01-10 #更新时间
 tags: [Atcoder, AtCoder Beginner Contest, cpp, Virtual Participation]
 description: "AtCoder Beginner Contest 380 VP 解题报告" #描述
 image: ''
-category: '算法'
+category: 'Algorithm'
 draft: false # 是否为草稿
 series: "Atcoder"
 ---
