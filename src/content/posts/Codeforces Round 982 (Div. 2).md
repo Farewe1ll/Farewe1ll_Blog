@@ -1,13 +1,13 @@
 ---
-title: "Codeforces Round 982 (Div. 2)"
+title: 'Codeforces Round 982 (Div. 2)'
 published: 2024-10-27 #创建时间
 updated: 2024-10-30 #更新时间
 tags: [Codeforces, Div. 2, cpp]
-description: "Codeforces Round 982 (Div. 2) 解题报告" #描述
+description: 'Codeforces Round 982 (Div. 2) 解题报告' #描述
 image: ''
 category: 'Algorithm'
 draft: false # 是否为草稿
-series: "Codeforces"
+series: 'Codeforces'
 ---
 
 # [Codeforces Round 982 (Div. 2)](https://codeforces.com/contest/2027)

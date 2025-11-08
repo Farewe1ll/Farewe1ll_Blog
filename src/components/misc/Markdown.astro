@@ -27,7 +27,7 @@ document.addEventListener("click", function (e: MouseEvent) {
 
         const timeoutId = target.getAttribute("data-timeout-id");
         if (timeoutId) {
-            clearTimeout(parseInt(timeoutId, 10));
+            clearTimeout(parseInt(timeoutId));
         }
 
         target.classList.add("success");

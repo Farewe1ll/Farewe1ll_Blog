@@ -1,13 +1,13 @@
 ---
-title: "AtCoder Beginner Contest 380 A~E"
+title: 'AtCoder Beginner Contest 380 A~E'
 published: 2025-01-09 #创建时间
 updated: 2025-01-10 #更新时间
 tags: [Atcoder, AtCoder Beginner Contest, cpp, Virtual Participation]
-description: "AtCoder Beginner Contest 380 VP 解题报告" #描述
+description: 'AtCoder Beginner Contest 380 VP 解题报告' #描述
 image: ''
 category: 'Algorithm'
 draft: false # 是否为草稿
-series: "Atcoder"
+series: 'Atcoder'
 ---
 
 # [AtCoder Beginner Contest 380](https://atcoder.jp/contests/abc380) (Virtual Participation)

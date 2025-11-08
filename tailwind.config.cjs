@@ -8,9 +8,6 @@ module.exports = {
       fontFamily: {
         sans: ["PingFang"],
       },
-      // tabSize: {
-      //   4: '4',
-      // }
     },
   },
   plugins: [require("@tailwindcss/typography")],

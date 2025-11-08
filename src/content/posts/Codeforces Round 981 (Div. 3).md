@@ -1,13 +1,13 @@
 ---
-title: "Codeforces Round 981 (Div. 3)"
+title: 'Codeforces Round 981 (Div. 3)'
 published: 2024-10-25 #创建时间
 updated: 2024-10-26 #更新时间
 tags: [Codeforces, Div. 3, cpp]
-description: "Codeforces Round 981 (Div. 3) 解题报告"
+description: 'Codeforces Round 981 (Div. 3) 解题报告'
 image: ''
 category: 'Algorithm'
 draft: false # 是否为草稿
-series: "Codeforces"
+series: 'Codeforces'
 ---
 
 # [Codeforces Round 981 (Div. 3)](https://codeforces.com/contest/2033)

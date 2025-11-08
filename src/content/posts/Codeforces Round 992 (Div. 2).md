@@ -1,13 +1,13 @@
 ---
-title: "Codeforces Round 992 (Div. 2) A~E"
+title: 'Codeforces Round 992 (Div. 2) A~E'
 published: 2025-01-14T13:26:32+08:00 #创建时间
 updated: 2025-01-14T13:26:32+08:00 #更新时间
 tags: [Codeforces, Div. 2, cpp, Virtual Participation]
-description: "Codeforces Round 992 (Div. 2) VP 解题报告" #描述
+description: 'Codeforces Round 992 (Div. 2) VP 解题报告' #描述
 image: ''
 category: 'Algorithm'
 draft: false # 是否为草稿
-series: "Codeforces"
+series: 'Codeforces'
 ---
 
 # [Codeforces Round 992 (Div. 2)](https://codeforces.com/contest/2040) (Virtual Participation)

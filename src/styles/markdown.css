@@ -47,6 +47,7 @@
         underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;
         box-decoration-break: clone;
         -webkit-box-decoration-break: clone;
+        display: inline-block;
 
         &:hover, &:active {
             @apply decoration-transparent;
@@ -117,16 +118,31 @@
         li {
             @apply leading-loose; /* 增加列表项的行间距 */
         }
+        li::marker {
+            @apply text-[var(--primary)];
+        }
     }
 
     blockquote {
         @apply leading-loose; /* 增加引用的行间距 */
+        @apply not-italic border-transparent relative;
+        font-weight: inherit;
+
+        &:before {
+            @apply content-[''] absolute -left-1 block transition bg-[var(--btn-regular-bg)] h-full w-1 rounded-full;
+        }
+
+        /* Remove the double quotes from default styles */
+        p:before, p:after {
+            @apply content-none;
+        }
+
     }
 
-    /* a img {
-        /* @apply no-underline !important; 移除下划线和装饰 */
-        /* display: inline-block; 确保图片正常显示 */
-        /* vertical-align: middle; 调整图片的垂直对齐 */
-        /* text-decoration: none; */
-    /* } */
+    .katex-display-container {
+        max-width: 100%;
+        overflow-x: auto;
+        margin: 1em 0;
+    }
+
 }

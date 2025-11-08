@@ -1,13 +1,13 @@
 ---
-title: "2025 SSDUT 科技文化节程序设计竞赛 G"
+title: '2025 SSDUT 科技文化节程序设计竞赛 G'
 published: 2025-04-26 #创建时间
 updated: 2025-04-26 #更新时间
 tags: [校赛, SSDUT, cpp, 笛卡尔树]
-description: "2025 SSDUT 科技文化节程序设计竞赛 G 题解"
+description: '2025 SSDUT 科技文化节程序设计竞赛 G 题解'
 image: ''
 category: 'Algorithm'
 draft: false # 是否为草稿
-series: "SSDUT"
+series: 'SSDUT'
 ---
 
 # [2025 SSDUT 科技文化节程序设计竞赛 G](https://hydro.ac/d/ssdut/p/O1043) 题解
