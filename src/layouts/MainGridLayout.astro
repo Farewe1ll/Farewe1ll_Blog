@@ -6,7 +6,6 @@ import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
-import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
 import {
     BANNER_HEIGHT,
@@ -107,12 +106,4 @@ const mainPanelTop = siteConfig.banner.enable
     </div>
 </div>
 
-<!-- The things that should be under the banner, only the TOC for now -->
-<div class="absolute w-full z-0 hidden">
-    <div class="relative max-w-[var(--page-width)] mx-auto">
-        <!-- Keep #toc element for Swup compatibility -->
-        <!-- On post pages, the actual TOC is in sidebar as #sidebar-toc -->
-        <div id="toc" class="transition-swup-fade"></div>
-    </div>
-</div>
 </Layout>

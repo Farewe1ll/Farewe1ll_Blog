@@ -428,12 +428,6 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
-
-		// Hide the TOC while scrolling back to top
-		let toc = document.getElementById('toc-wrapper');
-		if (toc) {
-			toc.classList.add('toc-not-ready')
-		}
 	});
 	window.swup.hooks.on('page:view', () => {
 		// hide the temp high element when the transition is done
@@ -448,13 +442,7 @@ const setup = () => {
 			if (heightExtend) {
 				heightExtend.classList.add('hidden')
 			}
-
-            // Just make the transition looks better
-            const toc = document.getElementById('toc-wrapper');
-            if (toc) {
-                toc.classList.remove('toc-not-ready')
-            }
-        }, 200)
+		}, 200)
 	});
 }
 if (window?.swup?.hooks) {
@@ -464,7 +452,6 @@ if (window?.swup?.hooks) {
 }
 
 let backToTopBtn = document.getElementById('back-to-top-btn');
-let toc = document.getElementById('toc-wrapper');
 let navbar = document.getElementById('navbar-wrapper')
 function scrollFunction() {
 	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100)
@@ -474,14 +461,6 @@ function scrollFunction() {
 			backToTopBtn.classList.remove('hide')
 		} else {
 			backToTopBtn.classList.add('hide')
-		}
-	}
-
-	if (bannerEnabled && toc) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			toc.classList.remove('toc-hide')
-		} else {
-			toc.classList.add('toc-hide')
 		}
 	}
 
