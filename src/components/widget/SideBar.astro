@@ -1,12 +1,12 @@
 ---
 import type { MarkdownHeading } from "astro";
+import { siteConfig } from "../../config";
 import AllSeries from "./AllSeries.astro";
 import Categories from "./Categories.astro";
 import Profile from "./Profile.astro";
 import Series from "./Series.astro";
 import Tag from "./Tags.astro";
 import TOC from "./TOC.astro";
-import { siteConfig } from "../../config";
 
 interface Props {
 	class?: string;
@@ -18,7 +18,8 @@ interface Props {
 const className = Astro.props.class;
 const series = Astro.props.series;
 const headings = Astro.props.headings;
-const showProfile = typeof Astro.props.showProfile === "boolean" ? Astro.props.showProfile : true;
+const showProfile =
+	typeof Astro.props.showProfile === "boolean" ? Astro.props.showProfile : true;
 const isPostPage = headings && headings.length > 0 && siteConfig.toc.enable;
 ---
 <div id="sidebar" data-page-type={isPostPage ? "post" : "default"} class:list={[className, "transition-swup-fade w-full sticky top-4", !isPostPage && "layout-default"]} style={isPostPage ? "max-height: calc(100vh - 2rem);" : ""}>
