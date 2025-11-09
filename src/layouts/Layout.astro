@@ -63,13 +63,19 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
+/** @type {Record<string, string>} */
 const bannerOffsetByPosition = {
 	top: `${BANNER_HEIGHT_EXTEND}vh`,
 	center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
 	bottom: "0",
 };
-const bannerOffset =
-	bannerOffsetByPosition[siteConfig.banner.position || "center"];
+const bannerPosition = siteConfig.banner.position || "center";
+let bannerOffset = bannerOffsetByPosition.center;
+if (bannerPosition === "top") {
+	bannerOffset = bannerOffsetByPosition.top;
+} else if (bannerPosition === "bottom") {
+	bannerOffset = bannerOffsetByPosition.bottom;
+}
 ---
 
 <!DOCTYPE html>
@@ -185,8 +191,11 @@ const bannerOffset =
 	.enable-banner #top-row {
 		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
 	}
-	.enable-banner.is-home #sidebar-sticky {
-		@apply top-[calc(1rem_-_var(--banner-height-extend))]
+	@screen lg {
+		.enable-banner.is-home #sidebar,
+		.enable-banner.lg\:is-home #sidebar {
+			@apply top-[calc(1rem_-_var(--banner-height-extend))]
+		}
 	}
 	.navbar-hidden {
 		@apply opacity-0 -translate-y-16
@@ -501,6 +510,77 @@ window.onresize = () => {
 	offset = offset - offset % 4;
 	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
 }
+
+/* Ensure page is tall enough so the sticky sidebar can reach its bottom
+   If sidebar is taller than main content, add padding-bottom to the content wrapper
+   so scrolling to page bottom reveals the entire sidebar. This fixes pages where
+   sidebar gets cut off because the main column is shorter. */
+function adjustPageForSidebar() {
+	try {
+		const sidebar = document.getElementById('sidebar');
+		const contentWrapper = document.getElementById('content-wrapper');
+		if (!sidebar || !contentWrapper) return;
+
+		const isPostPage = sidebar.dataset.pageType === 'post';
+
+		if (isPostPage) {
+			const toc = document.getElementById('sidebar-toc-container');
+			const series = document.getElementById('series-widget');
+			const categories = document.getElementById('sidebar-categories');
+			if (!toc || !series || !categories) {
+				contentWrapper.style.paddingBottom = '';
+				return;
+			}
+
+			const sidebarBottom = document.getElementById('sidebar-bottom');
+			const sidebarHeight = sidebar.offsetHeight;
+			const contentHeight = contentWrapper.offsetHeight;
+			const tocHeight = toc.offsetHeight;
+			const followingHeight = series.offsetHeight + categories.offsetHeight + (sidebarBottom ? sidebarBottom.offsetHeight : 0);
+			const available = sidebarHeight - followingHeight;
+			if (available > 0) {
+				toc.style.height = `${available}px`;
+			} else {
+				toc.style.height = `160px`;
+			}
+			contentWrapper.style.paddingBottom = '';
+			return;
+		}
+
+		const sidebarHeight = sidebar.offsetHeight;
+		const contentHeight = contentWrapper.offsetHeight;
+
+		if (sidebarHeight > contentHeight) {
+			const delta = sidebarHeight - contentHeight + 24;
+			contentWrapper.style.paddingBottom = `${delta}px`;
+		} else {
+			contentWrapper.style.paddingBottom = '';
+		}
+	} catch (e) {
+		// noop
+	}
+}
+
+function scheduleSidebarPaddingUpdate() {
+	requestAnimationFrame(adjustPageForSidebar);
+}
+
+window.addEventListener('resize', scheduleSidebarPaddingUpdate);
+
+if (window?.swup?.hooks) {
+	window.swup.hooks.on('content:replace', scheduleSidebarPaddingUpdate);
+	window.swup.hooks.on('visit:end', () => setTimeout(scheduleSidebarPaddingUpdate, 120));
+	window.swup.hooks.on('page:view', () => {
+		scheduleSidebarPaddingUpdate();
+		setTimeout(scheduleSidebarPaddingUpdate, 120);
+	});
+}
+
+setTimeout(scheduleSidebarPaddingUpdate, 50);
+
+// expose for sidebar script
+// @ts-ignore - injected helper for Swup navigation lifecycle
+window.adjustPageForSidebar = adjustPageForSidebar;
 
 </script>
 
