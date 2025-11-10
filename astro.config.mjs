@@ -38,7 +38,21 @@ export default defineConfig({
 			animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
 			// the default value `transition-` cause transition delay
 			// when the Tailwind class `transition-all` is used
-			containers: ["main", "#sidebar"],
+			containers: ["#swup-container", "#sidebar"],
+			fragments: [
+				{
+					from: ["/", "/archive/", "/about/", "/friends/", "/series/"],
+					to: ["/", "/archive/", "/about/", "/friends/", "/series/"],
+					containers: ["#swup-container"],
+					scroll: true,
+				},
+				{
+					from: /.*/,
+					to: ["/", "/archive/", "/about/", "/friends/", "/series/"],
+					containers: ["#swup-container"],
+					scroll: true,
+				},
+			],
 			smoothScrolling: true,
 			cache: true,
 			preload: true,

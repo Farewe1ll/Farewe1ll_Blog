@@ -21,6 +21,7 @@ const headings = Astro.props.headings;
 const showProfile =
 	typeof Astro.props.showProfile === "boolean" ? Astro.props.showProfile : true;
 const isPostPage = headings && headings.length > 0 && siteConfig.toc.enable;
+const shouldPreserveSidebarWidgets = !isPostPage;
 ---
 <div id="sidebar" data-page-type={isPostPage ? "post" : "default"} class:list={[className, "transition-swup-fade w-full sticky top-4", !isPostPage && "layout-default"]} style={isPostPage ? "max-height: calc(100vh - 2rem);" : ""}>
 	{/* Profile container - swapped with TOC on post pages */}
@@ -51,16 +52,16 @@ const isPostPage = headings && headings.length > 0 && siteConfig.toc.enable;
 			<div id="sidebar-toc-container" class="transition-swup-fade" style="display: none;"></div>
 		)}
 
-		<div id="series-widget" class="flex flex-col w-full gap-4 flex-shrink-0">
+		<div id="series-widget" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-series" : undefined} class="flex flex-col w-full gap-4 flex-shrink-0">
 			{ series && <Series series={ series }></Series> }
 			{ !series && <AllSeries class="onload-animation" style="animation-delay: 100ms"></AllSeries> }
 		</div>
 
-		<div id="sidebar-categories" class="flex-shrink-0 w-full">
+		<div id="sidebar-categories" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-categories" : undefined} class="flex-shrink-0 w-full">
 			<Categories class="onload-animation w-full" style="animation-delay: 150ms"></Categories>
 		</div>
 
-		<div id="sidebar-bottom" class="transition-swup-fade flex flex-col w-full gap-4" data-widgets={isPostPage ? "post" : "default"}>
+		<div id="sidebar-bottom" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-tags" : undefined} class="transition-swup-fade flex flex-col w-full gap-4" data-widgets={isPostPage ? "post" : "default"}>
 			{!isPostPage && <Tag class="onload-animation flex-shrink-0 w-full" style="animation-delay: 200ms"></Tag>}
 		</div>
 		</div>

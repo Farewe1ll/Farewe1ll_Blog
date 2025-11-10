@@ -26,3 +26,5 @@ bun.lockb
 yarn.lock
 
 .vscode/
+
+prompt.txt
