@@ -36,9 +36,8 @@ const seriesPreserveKey = hasSeriesWidget
 	: "sidebar-series-all";
 const categoriesPreserveKey = "sidebar-categories";
 const tagsPreserveKey = !isPostPage ? "sidebar-tags" : undefined;
-const sidebarTopPreserveKey = showProfile && !isPostPage
-	? "sidebar-top-profile"
-	: "sidebar-top-empty";
+const sidebarTopPreserveKey =
+	showProfile && !isPostPage ? "sidebar-top-profile" : "sidebar-top-empty";
 ---
 <div id="sidebar" data-page-type={isPostPage ? "post" : "default"} class:list={[className, "transition-swup-fade w-full sticky top-4", !isPostPage && "layout-default"]} style={isPostPage ? "max-height: calc(100vh - 2rem);" : ""}>
 	{/* Profile container - swapped with TOC on post pages */}
@@ -135,8 +134,6 @@ const sidebarTopPreserveKey = showProfile && !isPostPage
 			setTimeout(schedulePaddingUpdate, 120);
 			return () => {};
 		}
-
-		const isPostLayout = sidebarRoot?.dataset?.pageType === "post";
 
 		const getVisibleChildren = () => Array.from(sidebar.children).filter((el) =>
 			el instanceof HTMLElement && el.offsetParent !== null

@@ -63,12 +63,12 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
-/** @type {Record<string, string>} */
-const bannerOffsetByPosition = {
+const bannerOffsetByPosition: Record<string, string> = {
 	top: `${BANNER_HEIGHT_EXTEND}vh`,
 	center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
 	bottom: "0",
 };
+
 const bannerPosition = siteConfig.banner.position || "center";
 let bannerOffset = bannerOffsetByPosition.center;
 if (bannerPosition === "top") {
@@ -499,8 +499,6 @@ function adjustPageForSidebar() {
 		const sidebar = document.getElementById('sidebar');
 		const contentWrapper = document.getElementById('content-wrapper');
 		if (!sidebar || !contentWrapper) return;
-
-		const isPostPage = sidebar.dataset.pageType === 'post';
 
 		const sidebarHeight = sidebar.offsetHeight;
 		const contentHeight = contentWrapper.offsetHeight;
