@@ -169,10 +169,6 @@ const sidebarTopPreserveKey = showProfile && !isPostPage
 				card.style.height = "100%";
 			}
 
-			if (isPostLayout && sidebarRoot) {
-				// when TOC takes available space, ensure the root sidebar height reflects its content
-				sidebarRoot.style.setProperty("--sidebar-content-height", `${sidebar.scrollHeight}px`);
-			}
 		};
 
 		let rafHandle;

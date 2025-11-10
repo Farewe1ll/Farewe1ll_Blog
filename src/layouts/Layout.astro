@@ -502,30 +502,6 @@ function adjustPageForSidebar() {
 
 		const isPostPage = sidebar.dataset.pageType === 'post';
 
-		if (isPostPage) {
-			const toc = document.getElementById('sidebar-toc-container');
-			const series = document.getElementById('series-widget');
-			const categories = document.getElementById('sidebar-categories');
-			if (!toc || !series || !categories) {
-				contentWrapper.style.paddingBottom = '';
-				return;
-			}
-
-			const sidebarBottom = document.getElementById('sidebar-bottom');
-			const sidebarHeight = sidebar.offsetHeight;
-			const contentHeight = contentWrapper.offsetHeight;
-			const tocHeight = toc.offsetHeight;
-			const followingHeight = series.offsetHeight + categories.offsetHeight + (sidebarBottom ? sidebarBottom.offsetHeight : 0);
-			const available = sidebarHeight - followingHeight;
-			if (available > 0) {
-				toc.style.height = `${available}px`;
-			} else {
-				toc.style.height = `160px`;
-			}
-			contentWrapper.style.paddingBottom = '';
-			return;
-		}
-
 		const sidebarHeight = sidebar.offsetHeight;
 		const contentHeight = contentWrapper.offsetHeight;
 
