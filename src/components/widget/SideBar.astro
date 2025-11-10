@@ -21,11 +21,28 @@ const headings = Astro.props.headings;
 const showProfile =
 	typeof Astro.props.showProfile === "boolean" ? Astro.props.showProfile : true;
 const isPostPage = headings && headings.length > 0 && siteConfig.toc.enable;
-const shouldPreserveSidebarWidgets = !isPostPage;
+
+const toPreserveId = (value: string) =>
+	value
+		.toLowerCase()
+		.replace(/[^a-z0-9_-]/g, "-")
+		.replace(/-+/g, "-")
+		.replace(/^-|-$/g, "");
+
+const hasSeriesWidget = typeof series === "string" && series.length > 0;
+const seriesKeySource = hasSeriesWidget ? series : "";
+const seriesPreserveKey = hasSeriesWidget
+	? `sidebar-series-${toPreserveId(seriesKeySource) || "item"}`
+	: "sidebar-series-all";
+const categoriesPreserveKey = "sidebar-categories";
+const tagsPreserveKey = !isPostPage ? "sidebar-tags" : undefined;
+const sidebarTopPreserveKey = showProfile && !isPostPage
+	? "sidebar-top-profile"
+	: "sidebar-top-empty";
 ---
 <div id="sidebar" data-page-type={isPostPage ? "post" : "default"} class:list={[className, "transition-swup-fade w-full sticky top-4", !isPostPage && "layout-default"]} style={isPostPage ? "max-height: calc(100vh - 2rem);" : ""}>
 	{/* Profile container - swapped with TOC on post pages */}
-	<div id="sidebar-top" class="transition-swup-fade w-full">
+	<div id="sidebar-top" data-swup-preserve={sidebarTopPreserveKey} class="transition-swup-fade w-full">
 		{showProfile && !isPostPage &&
 			<div class="flex flex-col w-full gap-4 mb-4">
 				<Profile></Profile>
@@ -34,9 +51,29 @@ const shouldPreserveSidebarWidgets = !isPostPage;
 	</div>
 
 	<div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4" style={isPostPage ? "max-height: calc(100vh - 2rem);" : ""}>
-		{/* TOC container - uses remaining space after Series and Categories take their natural height */}
+		<div id="series-widget" data-swup-preserve={seriesPreserveKey} class="flex flex-col w-full gap-4 flex-shrink-0">
+			{ series && <Series series={ series }></Series> }
+			{ !series && <AllSeries class="onload-animation" style="animation-delay: 100ms"></AllSeries> }
+		</div>
+
+		<div id="sidebar-categories" data-swup-preserve={categoriesPreserveKey} class="flex-shrink-0 w-full">
+			<Categories class="onload-animation w-full" style="animation-delay: 150ms"></Categories>
+		</div>
+
+		<div
+			id="sidebar-bottom"
+			data-swup-preserve={tagsPreserveKey}
+			data-widgets={isPostPage ? "post" : "default"}
+			class:list={["transition-swup-fade w-full", !isPostPage ? "flex flex-col gap-4" : "hidden"]}
+		>
+			{!isPostPage && (
+				<Tag class="onload-animation flex-shrink-0 w-full" style="animation-delay: 200ms"></Tag>
+			)}
+		</div>
+
+		{/* TOC container - with updated placement below other widgets */}
 		{headings && headings.length > 0 && siteConfig.toc.enable ? (
-			<div id="sidebar-toc-container" class="transition-swup-fade flex-1 min-h-0 flex flex-col">
+			<div id="sidebar-toc-container" class="transition-swup-fade flex-1 min-h-0 flex flex-col gap-4">
 				<div class="card-base overflow-hidden flex flex-col h-full">
 					<div class="font-bold transition text-lg text-neutral-900 dark:text-neutral-100 relative ml-8 mt-4 mb-2
 						before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
@@ -51,19 +88,6 @@ const shouldPreserveSidebarWidgets = !isPostPage;
 		) : (
 			<div id="sidebar-toc-container" class="transition-swup-fade" style="display: none;"></div>
 		)}
-
-		<div id="series-widget" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-series" : undefined} class="flex flex-col w-full gap-4 flex-shrink-0">
-			{ series && <Series series={ series }></Series> }
-			{ !series && <AllSeries class="onload-animation" style="animation-delay: 100ms"></AllSeries> }
-		</div>
-
-		<div id="sidebar-categories" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-categories" : undefined} class="flex-shrink-0 w-full">
-			<Categories class="onload-animation w-full" style="animation-delay: 150ms"></Categories>
-		</div>
-
-		<div id="sidebar-bottom" data-swup-preserve={shouldPreserveSidebarWidgets ? "sidebar-tags" : undefined} class="transition-swup-fade flex flex-col w-full gap-4" data-widgets={isPostPage ? "post" : "default"}>
-			{!isPostPage && <Tag class="onload-animation flex-shrink-0 w-full" style="animation-delay: 200ms"></Tag>}
-		</div>
 		</div>
 	</div>
 
@@ -129,15 +153,14 @@ const shouldPreserveSidebarWidgets = !isPostPage;
 				return;
 			}
 
-			const following = children.slice(tocIndex + 1);
+			const otherChildren = children.filter((_, index) => index !== tocIndex);
 			const sidebarRootRect = sidebarRoot?.getBoundingClientRect();
 			const sidebarTop = sidebarRootRect ? sidebarRootRect.top : sidebar.getBoundingClientRect().top;
 			const viewportAvailable = window.innerHeight - sidebarTop - 16; // leave some breathing room at bottom
 			const sidebarStyles = window.getComputedStyle(sidebar);
 			const gapValue = parseFloat(sidebarStyles.rowGap || sidebarStyles.gap || "0") || 0;
-
-			const reservedHeight = following.reduce((total, el) => total + el.getBoundingClientRect().height, 0);
-			const totalGap = gapValue * following.length;
+			const totalGap = gapValue * Math.max(children.length - 1, 0);
+			const reservedHeight = otherChildren.reduce((total, el) => total + el.getBoundingClientRect().height, 0);
 			const available = Math.max(viewportAvailable - reservedHeight - totalGap, 160);
 
 			tocContainer.style.height = `${available}px`;
