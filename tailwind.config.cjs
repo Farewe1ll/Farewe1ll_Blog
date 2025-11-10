@@ -6,7 +6,16 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["PingFang"],
+        sans: [
+          "'Microsoft YaHei'",
+          "'Microsoft YaHei UI'",
+          "'PingFang SC'",
+          "PingFang",
+          "'Hiragino Sans GB'",
+          "'Noto Sans CJK SC'",
+          "'Source Han Sans SC'",
+          ...defaultTheme.fontFamily.sans,
+        ],
       },
     },
   },

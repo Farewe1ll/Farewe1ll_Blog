@@ -40,7 +40,7 @@ const isCollapsed = seriesArray.length >= 4;
 <WidgetLayout name={i18n(I18nKey.series)} id="all-series" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT} class={className} style={style}>
     <div class="flex flex-col gap-1">
         {seriesArray.map(([seriesName, seriesPosts]) => (
-            <a href={getPostUrlBySlug(seriesPosts[seriesPosts.length - 1].slug)}
+            <a href={getPostUrlBySlug(seriesPosts[0].slug)}
                 aria-label={seriesName}
                 class="group btn-plain h-10 w-full rounded-lg hover:text-[initial]"
             >

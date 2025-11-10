@@ -75,7 +75,7 @@ const groups: { category: string; series: Series[] }[] = (() => {
                     <div class="w-[65%] md:w-[75%] transition text-left text-50">{group.series.length} 个{i18n(I18nKey.series)}</div>
                 </div>
                 {group.series.map(series => (
-                    <a href={getPostUrlBySlug(series.posts[series.posts.length-1].slug)}
+                    <a href={getPostUrlBySlug(series.posts[0].slug)}
                        aria-label={series.name}
                        class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
                     >
