@@ -267,19 +267,19 @@ signed main() {
 对于位于奇数步上或者打上标记的节点，显然其额外的贡献即为其转移而来的子节点的贡献，故而可直接列出其额外贡献的期望方程为
 
 $$
-dp(fa_u) = dp(u),\space{} u \in odd\space{} or\space{} tag(u)
+dp(fa_u) = dp(u),\space{} u \in odd \vee tag(u)
 $$
 
 而对于偶数步上且未被打上标记的节点，其额外贡献的期望方程为
 
 $$
-dp(u) = \frac{deg(u) - 1}{deg(u)} * (dp(u) + 2) + \frac{1}{deg(u)} * dp(fa_u),\space{} u \in even\space{} and\space{} not\space{} tag(u)
+dp(u) = \frac{deg(u) - 1}{deg(u)} * (dp(u) + 2) + \frac{1}{deg(u)} * dp(fa_u),\space{} u \in even \wedge \neg tag(u)
 $$
 
 化简可得
 
 $$
-dp(fa_u) = dp(u) + 2 * (deg(u) - 1),\space{} u \in even\space{} and\space{} not\space{} tag(u)
+dp(fa_u) = dp(u) + 2 * (deg(u) - 1),\space{} u \in even \wedge \neg tag(u)
 $$
 
 如果题目可以离线，似乎也可以将询问离线，然后 dfs 树上每个点时处理该点的所有查询，使用权值树状数组维护答案即可。

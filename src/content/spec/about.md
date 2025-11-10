@@ -2,14 +2,14 @@
 
 SE 本科在读，前 OIer，退役不知名 ACMer，②江莉XCPC民间算法交流枢纽群 & 大兔子竞赛资讯交流群 ~~暴政~~管理。
 
-[GPG Fingerprint: 5CE6 F852 5922 E6C5 31DD  1477 57B8 2D95 B637 83AF](https://keys.openpgp.org/vks/v1/by-fingerprint/5CE6F8525922E6C531DD147757B82D95B63783AF)
+[GPG Fingerprint: BF69 2D3F 104B 8B04  616B D6AB A642 8317 448B 712A](https://keys.openpgp.org/vks/v1/by-fingerprint/BF692D3F104B8B04616BD6ABA6428317448B712A)
 
 Or import via:
 
-[openpgp4fpr](openpgp4fpr:5CE6F8525922E6C531DD147757B82D95B63783AF)
+[openpgp4fpr](openpgp4fpr:BF692D3F104B8B04616BD6ABA6428317448B712A)
 
 ```bash
-gpg --keyserver hkps://keys.openpgp.org --recv-keys 5CE6F8525922E6C531DD147757B82D95B63783AF
+gpg --keyserver hkps://keys.openpgp.org --recv-keys BF692D3F104B8B04616BD6ABA6428317448B712A
 ```
 
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=Farewe1ll&show_icons=true&theme=tokyonight&hide=contribs,prs&layout=compact)
