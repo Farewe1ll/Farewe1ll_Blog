@@ -270,6 +270,10 @@ const bannerEnabled = !!document.getElementById('banner-wrapper')
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener("click", event => {
 		let panelDom = document.getElementById(panel);
+		if (!panelDom) {
+			// Panel might not be mounted yet (e.g. Svelte client-only components)
+			return;
+		}
 		let tDom = event.target;
 		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
 		for (let ig of ignores) {
@@ -278,7 +282,7 @@ function setClickOutsideToClose(panel: string, ignores: string[]) {
 				return;
 			}
 		}
-		panelDom!.classList.add("float-panel-closed");
+		panelDom.classList.add("float-panel-closed");
 	});
 }
 setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
