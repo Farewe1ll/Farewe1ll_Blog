@@ -387,6 +387,62 @@ function init() {
 /* Load settings when entering the site */
 init();
 
+function syncSidebarLayout() {
+	// 同步侧栏根节点状态
+	try {
+		const sidebar = document.getElementById('sidebar');
+		if (!sidebar) return;
+		const tocContainer = document.getElementById('sidebar-toc-container');
+		const isPost =
+			!!tocContainer &&
+			window.getComputedStyle(tocContainer).display !== 'none' &&
+			!!tocContainer.querySelector('#toc-inner-wrapper');
+		sidebar.dataset.pageType = isPost ? 'post' : 'default';
+		sidebar.classList.toggle('layout-default', !isPost);
+		if (isPost) {
+			sidebar.style.maxHeight = 'calc(100vh - 2rem)';
+		} else {
+			sidebar.style.removeProperty('max-height');
+		}
+	} catch (_) {
+		// noop
+	}
+}
+
+function setupSidebarPaddingSync() {
+	// 侧栏填充同步
+	const observer = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					syncSidebarLayout();
+				}
+			});
+		},
+		{
+			root: null,
+			rootMargin: "0px",
+			threshold: 0.1,
+		}
+	);
+
+	const sidebar = document.getElementById("sidebar");
+	if (sidebar) {
+		observer.observe(sidebar);
+	}
+
+	return () => {
+		observer.disconnect();
+	};
+}
+
+window.__farewe1llSidebarPaddingCleanup?.();
+window.__farewe1llSidebarPaddingCleanup = setupSidebarPaddingSync();
+
+window.__farewe1llSidebarTocCleanup?.();
+window.__farewe1llSidebarTocCleanup = setupSidebarToc();
+syncSidebarLayout();
+
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
 /*
@@ -417,7 +473,10 @@ const setup = () => {
 			navbar.classList.add('navbar-hidden')
 		}
 	})
-	window.swup.hooks.on('content:replace', initCustomScrollbar)
+	window.swup.hooks.on('content:replace', () => {
+		initCustomScrollbar();
+		syncSidebarLayout();
+	})
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
 		// change banner height immediately when a link is clicked
 		const bodyElement = document.querySelector('body')
@@ -439,6 +498,7 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
+		syncSidebarLayout();
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {
@@ -447,6 +507,7 @@ const setup = () => {
 				heightExtend.classList.add('hidden')
 			}
 		}, 200)
+		syncSidebarLayout();
 	});
 }
 if (window?.swup?.hooks) {
