@@ -60,7 +60,8 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://cn.gravatar.com/avatar/8e405a63aeffe0f7f7de0d072d066984d85552d0f3a1ff6082301d7becec8080?s=1024", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+	avatar:
+		"https://cn.gravatar.com/avatar/8e405a63aeffe0f7f7de0d072d066984d85552d0f3a1ff6082301d7becec8080?s=1024", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "Farewe1ll_山竹",
 	bio: "拨雪寻春，烧灯续昼。",
 	links: [
