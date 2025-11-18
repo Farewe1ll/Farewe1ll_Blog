@@ -267,6 +267,13 @@ function disableAnimation() {
 
 const bannerEnabled = !!document.getElementById('banner-wrapper')
 
+declare global {
+	interface Window {
+		__farewe1llSidebarPaddingCleanup?: () => void;
+		__farewe1llSidebarTocCleanup?: () => void;
+	}
+}
+
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener("click", event => {
 		let panelDom = document.getElementById(panel);
@@ -430,6 +437,29 @@ function setupSidebarPaddingSync() {
 	if (sidebar) {
 		observer.observe(sidebar);
 	}
+
+	return () => {
+		observer.disconnect();
+	};
+}
+
+function setupSidebarToc() {
+	const tocContainer = document.getElementById("sidebar-toc-container");
+	if (!tocContainer) {
+		return () => {};
+	}
+
+	const update = () => {
+		const hasLinks =
+			tocContainer.querySelector("#toc-inner-wrapper a[href]") !== null;
+		tocContainer.classList.toggle("toc-not-ready", !hasLinks);
+		tocContainer.classList.toggle("toc-hide", !hasLinks);
+	};
+
+	update();
+
+	const observer = new MutationObserver(() => update());
+	observer.observe(tocContainer, { childList: true, subtree: true });
 
 	return () => {
 		observer.disconnect();
