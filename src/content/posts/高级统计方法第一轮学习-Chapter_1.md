@@ -68,7 +68,7 @@ Supervised Learning VS Unsupervised Learning
 - 概率密度函数 $f(x)$：不在意单点取值，故直接取开区间。
 
 $$
-P{a < X < b} = \int_a^b{p(x)\bf{d}x}
+P\{a < X < b\} = \int_a^b{p(x)\bf{d}x}
 $$
 
 - 概率分布函数 $F(x)$：常取左闭右开区间。
@@ -76,7 +76,7 @@ $$
 定义为
 
 $$
-F(x) = P{X \leq x}
+F(x) = P\{X \leq x\}
 $$
 
 连续型随机变量下即为：
