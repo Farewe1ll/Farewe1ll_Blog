@@ -68,7 +68,7 @@ Supervised Learning VS Unsupervised Learning
 - 概率密度函数 $f(x)$：不在意单点取值，故直接取开区间。
 
 $$
-P\{a < X < b\} = \int_a^b{p(x)\bf{d}x}
+P\{a < X < b\} = \int_a^b{p(x)dx}
 $$
 
 - 概率分布函数 $F(x)$：常取左闭右开区间。
@@ -82,7 +82,7 @@ $$
 连续型随机变量下即为：
 
 $$
-F(x) = \int_{-\infty}^x{p(t)\bf{d}t}
+F(x) = \int_{-\infty}^x{p(t)dt}
 $$
 
 可简单理解为
@@ -105,7 +105,7 @@ $$
 E(X) =
   \begin{cases}
     \sum_{i = 1}^{\infty}{x_i p_i}, & \text{if X is discrete} \\
-    \int_{-\infty}^{+\infty}{x p(x) \bf{d}x}, & \text{if X is continuous} \\
+    \int_{-\infty}^{+\infty}{x p(x) dx}, & \text{if X is continuous} \\
   \end{cases}
 $$
 
@@ -113,7 +113,7 @@ $$
 D(X) =
   \begin{cases}
     \sum_{i = 1}^{\infty}{(x_i - E(X))^2 p_i}, & \text{if X is discrete} \\
-    \int_{-\infty}^{+\infty}{(x - E(X))^2 p(x) \bf{d}x}, & \text{if X if continuous} \\
+    \int_{-\infty}^{+\infty}{(x - E(X))^2 p(x) dx}, & \text{if X if continuous} \\
   \end{cases}
 $$
 
@@ -192,7 +192,7 @@ $$
 其中：
 
 $$
-P(D) = \int_{\vec{p}} { P(D | \vec{p}) P(\vec{p}) \bf{d}\vec{p} }
+P(D) = \int_{\vec{p}} { P(D | \vec{p}) P(\vec{p}) d\vec{p} }
 $$
 
 贝叶斯估计：和最大似然估计最显著的区别是，假设事件的因（也就是要估计的参数）是随机分布的，但这些因是有概率性，就是先验概率（某个车间的零件比例）
