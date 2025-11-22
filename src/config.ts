@@ -32,7 +32,7 @@ export const siteConfig: SiteConfig = {
 	favicon: [
 		// Leave this array empty to use the default favicon
 		{
-			src: "/favicon/favicon.png", // Path of the favicon, relative to the /public directory
+			src: "https://cn.cravatar.com/avatar/8e405a63aeffe0f7f7de0d072d066984d85552d0f3a1ff6082301d7becec8080?s=512", // Path of the favicon, relative to the /public directory
 			//   theme: 'light',              // (Optional) Either 'light' or 'dark', set only if you have different favicons for light and dark mode
 			//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
 		},
