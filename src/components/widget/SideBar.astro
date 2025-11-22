@@ -73,7 +73,7 @@ const sidebarTopPreserveKey =
 		{/* TOC container - with updated placement below other widgets */}
 		{headings && headings.length > 0 && siteConfig.toc.enable ? (
 			<div id="sidebar-toc-container" class="transition-swup-fade flex-1 min-h-0 flex flex-col gap-4">
-				<div class="card-base overflow-hidden flex flex-col h-full">
+				<div class="card-base overflow-hidden flex flex-col h-full onload-animation" style="animation-delay: 200ms">
 					<div class="font-bold transition text-lg text-neutral-900 dark:text-neutral-100 relative ml-8 mt-4 mb-2
 						before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
 						before:absolute before:left-[-16px] before:top-[5.5px]">目录</div>
