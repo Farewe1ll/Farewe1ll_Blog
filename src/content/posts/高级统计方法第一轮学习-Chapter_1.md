@@ -1,7 +1,7 @@
 ---
 title: '高级统计方法第一轮学习 Chapter 1'
 published: 2025-11-18
-description: '高级统计方法第一轮学习 Chapter 1'
+description: '高级统计方法第一轮学习 Chapter 1 导论'
 image: ''
 tags: ['Statistical Learning']
 category: 'Study'
