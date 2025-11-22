@@ -135,9 +135,11 @@ const sidebarTopPreserveKey =
 			return () => {};
 		}
 
-		const getVisibleChildren = () => Array.from(sidebar.children).filter((el) =>
-			el instanceof HTMLElement && el.offsetParent !== null
-		);
+		const getVisibleChildren = () => Array.from(sidebar.children).filter((el) => {
+			if (!(el instanceof HTMLElement)) return false;
+			const style = window.getComputedStyle(el);
+			return style.display !== "none";
+		});
 
 		const update = () => {
 			if (!sidebar.isConnected || !tocContainer.isConnected) {
