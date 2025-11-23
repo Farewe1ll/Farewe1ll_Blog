@@ -1,6 +1,6 @@
 ---
 title: '高级统计方法 第一轮学习 Chapter 5'
-published: 2025-11-22
+published: 2025-11-23
 description: '高级统计方法 第一轮学习 Chapter 5 重抽样方法'
 image: ''
 tags: ['Statistical Learning']
