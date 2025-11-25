@@ -65,6 +65,17 @@ export default defineConfig({
 					],
 					scroll: true,
 				},
+				{
+					// Post 到 Post 的导航：只更新主内容、TOC 和 Series，保留 Categories
+					from: /\/posts\/.*$/,
+					to: /\/posts\/.*$/,
+					containers: [
+						"#swup-container",
+						"#series-widget",
+						"#sidebar-toc-container",
+					],
+					scroll: true,
+				},
 			],
 			smoothScrolling: true,
 			cache: true,
