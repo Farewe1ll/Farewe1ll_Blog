@@ -44,6 +44,7 @@ export default defineConfig({
 				"#series-widget",
 				"#sidebar-bottom",
 				"#sidebar-toc-container",
+				"#sidebar-sticky",
 			],
 			fragments: [
 				{

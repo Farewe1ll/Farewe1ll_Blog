@@ -91,141 +91,141 @@ const sidebarTopPreserveKey =
 	</div>
 
 	<script is:inline data-swup-reload-script defer>
-		const schedulePaddingUpdate = () => {
-			if (typeof window === "undefined") return;
-			window.requestAnimationFrame(() => {
-				if (typeof window.adjustPageForSidebar === "function") {
-					window.adjustPageForSidebar();
+		(() => {
+			const schedulePaddingUpdate = () => {
+				if (typeof window === "undefined") return;
+				window.requestAnimationFrame(() => {
+					if (typeof window.adjustPageForSidebar === "function") {
+						window.adjustPageForSidebar();
+					}
+				});
+			};
+
+			const setupSidebarPaddingSync = () => {
+				const sidebarRoot = document.getElementById("sidebar");
+				const contentWrapper = document.getElementById("content-wrapper");
+				const ensurePadding = () => {
+					schedulePaddingUpdate();
+					setTimeout(schedulePaddingUpdate, 120);
+				};
+
+				ensurePadding();
+				document.addEventListener("swup:page:view", ensurePadding);
+
+				let resizeObserver;
+				if (typeof ResizeObserver !== "undefined") {
+					resizeObserver = new ResizeObserver(() => schedulePaddingUpdate());
+					if (sidebarRoot) resizeObserver.observe(sidebarRoot);
+					if (contentWrapper) resizeObserver.observe(contentWrapper);
 				}
-			});
-		};
 
-	const setupSidebarPaddingSync = () => {
-		const sidebarRoot = document.getElementById("sidebar");
-		const contentWrapper = document.getElementById("content-wrapper");
-		const ensurePadding = () => {
-			schedulePaddingUpdate();
-			setTimeout(schedulePaddingUpdate, 120);
-		};
+				return () => {
+					document.removeEventListener("swup:page:view", ensurePadding);
+					resizeObserver?.disconnect?.();
+				};
+			};
 
-		ensurePadding();
-		document.addEventListener("swup:page:view", ensurePadding);
-
-		let resizeObserver;
-		if (typeof ResizeObserver !== "undefined") {
-			resizeObserver = new ResizeObserver(() => schedulePaddingUpdate());
-			if (sidebarRoot) resizeObserver.observe(sidebarRoot);
-			if (contentWrapper) resizeObserver.observe(contentWrapper);
-		}
-
-		return () => {
-			document.removeEventListener("swup:page:view", ensurePadding);
-			resizeObserver?.disconnect?.();
-		};
-	};
-
-	const setupSidebarToc = () => {
-		const sidebar = document.getElementById("sidebar-sticky");
-		const tocContainer = document.getElementById("sidebar-toc-container");
-		const tocInner = document.getElementById("toc-inner-wrapper");
-		const sidebarRoot = document.getElementById("sidebar");
-		if (!sidebar || !tocContainer || !tocInner || tocContainer.style.display === "none") {
-			schedulePaddingUpdate();
-			setTimeout(schedulePaddingUpdate, 120);
-			return () => {};
-		}
-
-		const getVisibleChildren = () => Array.from(sidebar.children).filter((el) => {
-			if (!(el instanceof HTMLElement)) return false;
-			const style = window.getComputedStyle(el);
-			return style.display !== "none";
-		});
-
-		const update = () => {
-			if (!sidebar.isConnected || !tocContainer.isConnected) {
-				return;
-			}
-
-			const children = getVisibleChildren();
-			const tocIndex = children.indexOf(tocContainer);
-			if (tocIndex === -1) {
-				return;
-			}
-
-			const otherChildren = children.filter((_, index) => index !== tocIndex);
-			const sidebarRootRect = sidebarRoot?.getBoundingClientRect();
-			const sidebarTop = sidebarRootRect ? sidebarRootRect.top : sidebar.getBoundingClientRect().top;
-			const viewportAvailable = window.innerHeight - sidebarTop - 16; // leave some breathing room at bottom
-			const sidebarStyles = window.getComputedStyle(sidebar);
-			const gapValue = parseFloat(sidebarStyles.rowGap || sidebarStyles.gap || "0") || 0;
-			const totalGap = gapValue * Math.max(children.length - 1, 0);
-			const reservedHeight = otherChildren.reduce((total, el) => total + el.getBoundingClientRect().height, 0);
-			const available = Math.max(viewportAvailable - reservedHeight - totalGap, 160);
-
-			tocContainer.style.height = `${available}px`;
-			const card = tocContainer.querySelector<HTMLElement>(".card-base");
-			if (card) {
-				card.style.height = "100%";
-			}
-
-		};
-
-		let rafHandle;
-		const scheduleUpdate = () => {
-			if (rafHandle) {
-				cancelAnimationFrame(rafHandle);
-			}
-			rafHandle = window.requestAnimationFrame(() => {
-				rafHandle = undefined;
-				update();
-				schedulePaddingUpdate();
-			});
-		};
-
-		const resizeHandler = () => scheduleUpdate();
-		window.addEventListener("resize", resizeHandler);
-
-		const pageViewHandler = () => {
-			scheduleUpdate();
-			setTimeout(scheduleUpdate, 120);
-		};
-		document.addEventListener("swup:page:view", pageViewHandler);
-
-		const roTargets = [
-			document.getElementById("series-widget"),
-			document.getElementById("sidebar-categories"),
-			document.getElementById("sidebar-bottom"),
-			sidebarRoot
-		].filter((el) => el instanceof HTMLElement);
-
-		let resizeObserver;
-		if (typeof ResizeObserver !== "undefined") {
-			resizeObserver = new ResizeObserver(() => scheduleUpdate());
-			roTargets.forEach(target => resizeObserver?.observe(target));
-		}
-
-		scheduleUpdate();
-		setTimeout(scheduleUpdate, 100);
-
-		return () => {
-			if (rafHandle) {
-				cancelAnimationFrame(rafHandle);
-			}
-			window.removeEventListener("resize", resizeHandler);
-			document.removeEventListener("swup:page:view", pageViewHandler);
-			resizeObserver?.disconnect?.();
-			if (tocContainer) {
-				tocContainer.style.height = "";
-				const card = tocContainer.querySelector(".card-base");
-				if (card instanceof HTMLElement) {
-					card.style.height = "";
+			const setupSidebarToc = () => {
+				const sidebar = document.getElementById("sidebar-sticky");
+				const tocContainer = document.getElementById("sidebar-toc-container");
+				const tocInner = document.getElementById("toc-inner-wrapper");
+				const sidebarRoot = document.getElementById("sidebar");
+				if (!sidebar || !tocContainer || !tocInner || tocContainer.style.display === "none") {
+					schedulePaddingUpdate();
+					setTimeout(schedulePaddingUpdate, 120);
+					return () => {};
 				}
-			}
-		};
-	};
-				window.__farewe1llSidebarPaddingCleanup?.();
-				window.__farewe1llSidebarPaddingCleanup = setupSidebarPaddingSync();
 
-	window.__farewe1llSidebarTocCleanup?.();
-	window.__farewe1llSidebarTocCleanup = setupSidebarToc();
+				const getVisibleChildren = () => Array.from(sidebar.children).filter((el) => {
+					if (!(el instanceof HTMLElement)) return false;
+					const style = window.getComputedStyle(el);
+					return style.display !== "none";
+				});
+
+				const update = () => {
+					if (!sidebar.isConnected || !tocContainer.isConnected) {
+						return;
+					}
+
+					const children = getVisibleChildren();
+					const tocIndex = children.indexOf(tocContainer);
+					if (tocIndex === -1) {
+						return;
+					}
+
+					const otherChildren = children.filter((_, index) => index !== tocIndex);
+					const sidebarRootRect = sidebarRoot?.getBoundingClientRect();
+					const sidebarTop = sidebarRootRect ? sidebarRootRect.top : sidebar.getBoundingClientRect().top;
+					const viewportAvailable = window.innerHeight - sidebarTop - 16; // leave some breathing room at bottom
+					const sidebarStyles = window.getComputedStyle(sidebar);
+					const gapValue = parseFloat(sidebarStyles.rowGap || sidebarStyles.gap || "0") || 0;
+					const totalGap = gapValue * Math.max(children.length - 1, 0);
+					const reservedHeight = otherChildren.reduce((total, el) => total + el.getBoundingClientRect().height, 0);
+					const available = Math.max(viewportAvailable - reservedHeight - totalGap, 160);
+					tocContainer.style.height = `${available}px`;
+					const card = tocContainer.querySelector<HTMLElement>(".card-base");
+					if (card) {
+						card.style.height = "100%";
+					}
+				};
+
+				let rafHandle;
+				const scheduleUpdate = () => {
+					if (rafHandle) {
+						cancelAnimationFrame(rafHandle);
+					}
+					rafHandle = window.requestAnimationFrame(() => {
+						rafHandle = undefined;
+						update();
+						schedulePaddingUpdate();
+					});
+				};
+
+				const resizeHandler = () => scheduleUpdate();
+				window.addEventListener("resize", resizeHandler);
+
+				const pageViewHandler = () => {
+					scheduleUpdate();
+					setTimeout(scheduleUpdate, 120);
+				};
+				document.addEventListener("swup:page:view", pageViewHandler);
+
+				const roTargets = [
+					document.getElementById("series-widget"),
+					document.getElementById("sidebar-categories"),
+					document.getElementById("sidebar-bottom"),
+					sidebarRoot
+				].filter((el) => el instanceof HTMLElement);
+
+				let resizeObserver;
+				if (typeof ResizeObserver !== "undefined") {
+					resizeObserver = new ResizeObserver(() => scheduleUpdate());
+					roTargets.forEach(target => resizeObserver?.observe(target));
+				}
+
+				scheduleUpdate();
+				setTimeout(scheduleUpdate, 100);
+
+				return () => {
+					if (rafHandle) {
+						cancelAnimationFrame(rafHandle);
+					}
+					window.removeEventListener("resize", resizeHandler);
+					document.removeEventListener("swup:page:view", pageViewHandler);
+					resizeObserver?.disconnect?.();
+					if (tocContainer) {
+						tocContainer.style.height = "";
+						const card = tocContainer.querySelector(".card-base");
+						if (card instanceof HTMLElement) {
+							card.style.height = "";
+						}
+					}
+				};
+			};
+			window.__farewe1llSidebarPaddingCleanup?.();
+			window.__farewe1llSidebarPaddingCleanup = setupSidebarPaddingSync();
+
+			window.__farewe1llSidebarTocCleanup?.();
+			window.__farewe1llSidebarTocCleanup = setupSidebarToc();
+		})();
 	</script>
