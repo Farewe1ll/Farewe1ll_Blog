@@ -12,9 +12,9 @@ Or import via:
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 0A2BD61E0CEC8F3FFD0095D4038D1C8B8C3C0306
 ```
 
-![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=Farewe1ll&show_icons=true&theme=tokyonight&hide=contribs,prs&layout=compact)
+![Anurag's GitHub stats](https://gh-readme-stats.farewe1ll.top/api?username=Farewe1ll&show_icons=true&theme=tokyonight&hide=contribs,prs&layout=compact)
 
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Farewe1ll&theme=tokyonight&layout=compact)
+![Top Langs](https://gh-readme-stats.farewe1ll.top/api/top-langs/?username=Farewe1ll&theme=tokyonight&layout=compact)
 
 ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Frelation%2Fstat%3Fvmid%3D681235442&query=%24.data.follower&suffix=%20followers&style=for-the-badge&label=Bilibili&labelColor=FE7398&color=282c34)
 
