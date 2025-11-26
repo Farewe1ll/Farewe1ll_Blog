@@ -145,7 +145,7 @@ $$
 
 具体的：从原始数据集中**有放回**地抽取 $n$ 个样本，形成一个新的数据集，称为一个 bootstrap 数据集。重复这一过程 $B$ 次，得到 $B$ 个 bootstrap 数据集。每个数据集的大小均为 $n$。
 
-一般使用 $Z^{*1}$ 表示第一个 bootstrap 数据集，$Z^{*2}$ 表示第二个 bootstrap 数据集，依此类推，$Z^{*B}$ 表示第 $B$ 个 bootstrap 数据集。使用 $Z^{*i}$ 产生 $$bootstrap 估计$$，记作 $\hat{\alpha}^{*i}$。
+一般使用 $Z^{*1}$ 表示第一个 bootstrap 数据集，$Z^{*2}$ 表示第二个 bootstrap 数据集，依此类推，$Z^{*B}$ 表示第 $B$ 个 bootstrap 数据集。使用 $Z^{*i}$ 产生 $bootstrap$ 估计，记作 $\hat{\alpha}^{*i}$。
 
 可以获得这些 bootstrap 估计的标准误差：
 
