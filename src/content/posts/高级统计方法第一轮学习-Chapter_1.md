@@ -11,7 +11,7 @@ series: 'Maths'
 
 # 高级统计方法 第一轮学习 Chapter 1 导论
 
-## 一、导论
+## 导论
 
 ### 1.1 基本概念
 
@@ -49,7 +49,7 @@ Supervised Learning VS Unsupervised Learning
 
    - 降维
 
-## 二、统计基础复习
+## 统计基础复习
 
 ### 2.1 概率基础
 
