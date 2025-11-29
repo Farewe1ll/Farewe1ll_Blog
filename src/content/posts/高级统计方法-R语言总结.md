@@ -35,20 +35,20 @@ library(tree) # 决策树
 library(gbm) # 梯度提升机
 ```
 
-| 包名 | 作用 (根据来源) | 来源 |
-| :--: | :--: | :--: |
-| **MASS** | 包含 `Boston` 等数据集；用于拟合线性判别分析（LDA）和二次判别分析（QDA）模型，通过 `lda()` 和 `qda()` 函数实现。 | |
-| **randomForest** | 用于实现装袋法（Bagging）和随机森林（Random Forest）；`randomForest()` 函数既可用于随机森林，也可用于装袋法（当 `mtry=p` 时）。 | |
-| **glmnet** | 用于拟合岭回归（Ridge regression）和 Lasso 模型；也可用于多项式逻辑回归的计算。 | |
-| **boot** | 包含 `boot()` 函数，用于通过反复地从数据集中有放回地抽取观测（自助抽样）来执行自助法。 | |
-| **splines** | 用于拟合回归样条的函数；其中的 `bs()` 函数可以产生针对给定结点的所有样条基函数的矩阵。 | |
-| **gam** | 包含 `s()` 函数，用于广义可加模型（GAM）中拟合光滑样条。 | |
-| **tree** | 用于构造分类树和回归树；包含 `tree()`、`cv.tree()`（交叉验证树的复杂性）和 `prune.misclass()`（剪枝）等函数。 | |
-| **gbm** | 用于建立回归树的提升法（Boosting），通过 `gbm()` 函数实现，常用于梯度提升模型。 | |
-| **e1071** | 未在来源中提及。 | - |
-| **class** | 未在来源中提及。 | - |
-| **leaps** | 未在来源中提及。 | - |
-| **pls** | 未在来源中提及。 | - |
+| 包名 | 作用 (根据来源) |
+| :--: | :--: |
+| **MASS** | 包含 `Boston` 等数据集；用于拟合线性判别分析（LDA）和二次判别分析（QDA）模型，通过 `lda()` 和 `qda()` 函数实现。 |
+| **randomForest** | 用于实现装袋法（Bagging）和随机森林（Random Forest）；`randomForest()` 函数既可用于随机森林，也可用于装袋法（当 `mtry=p` 时）。 |
+| **glmnet** | 用于拟合岭回归（Ridge regression）和 Lasso 模型；也可用于多项式逻辑回归的计算。 |
+| **boot** | 包含 `boot()` 函数，用于通过反复地从数据集中有放回地抽取观测（自助抽样）来执行自助法。 |
+| **splines** | 用于拟合回归样条的函数；其中的 `bs()` 函数可以产生针对给定结点的所有样条基函数的矩阵。 |
+| **gam** | 包含 `s()` 函数，用于广义可加模型（GAM）中拟合光滑样条。 |
+| **tree** | 用于构造分类树和回归树；包含 `tree()`、`cv.tree()`（交叉验证树的复杂性）和 `prune.misclass()`（剪枝）等函数。 |
+| **gbm** | 用于建立回归树的提升法（Boosting），通过 `gbm()` 函数实现，常用于梯度提升模型。 |
+| **e1071** | 包含支持向量机（SVM）等机器学习方法，通过 `svm()` 函数实现。 |
+| **class** | 用于实现K近邻算法（K-Nearest Neighbors），通过 `knn()` 函数实现。 |
+| **leaps** | 用于特征选择，包含 `regsubsets()` 函数实现逐步回归等方法。 |
+| **pls** | 用于偏最小二乘回归（Partial Least Squares），包含 `plsr()` 和 `mvr()` 函数。 |
 
 ## 基本命令
 
@@ -445,7 +445,7 @@ boosting_model_bin <- gbm(class ~ x1 + x2 + x3, data = data, distribution = "ber
 
 ```r
 library(e1071)
-svm_model <- svm(class ~ x1 + x2, data = data, kernel = "linear", cost = 1, scale = TRUE) # 拟合线性支持向量分类器，进行标准化
+svm_model <- svm(class ~ x1 + x2, data = data, kernel = "linear", cost = 1, scale = TRUE) # 拟合线性支持向量分类器，进行
 summary(svm_model) # 查看模型摘要
 predictions <- predict(svm_model, newdata = predict_data) # 进行预测
 
