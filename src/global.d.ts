@@ -4,6 +4,8 @@ declare global {
 	interface Window {
 		// type from '@swup/astro' is incorrect
 		swup: AstroIntegration;
+		// Sidebar padding adjustment helper
+		adjustPageForSidebar?: () => void;
 		pagefind: {
 			search: (query: string) => Promise<{
 				results: Array<{

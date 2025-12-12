@@ -628,7 +628,7 @@ function adjustPageForSidebar() {
 	}
 }
 
-let scheduledUpdate = null;
+let scheduledUpdate: number | null = null;
 function scheduleSidebarPaddingUpdate() {
 	if (scheduledUpdate) {
 		cancelAnimationFrame(scheduledUpdate);

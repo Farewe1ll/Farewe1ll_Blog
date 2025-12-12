@@ -57,11 +57,12 @@ const classes = ["block", "w-full", "pb-4", "card-base", className]
                 // Trigger layout adjustment after expansion with a slight delay
                 // to let the layout settle before recalculating
                 if (typeof window.adjustPageForSidebar === "function") {
+                    const adjustFn = window.adjustPageForSidebar;
                     // Use requestAnimationFrame to batch with browser's layout cycle
                     requestAnimationFrame(() => {
-                        window.adjustPageForSidebar();
+                        adjustFn();
                         // One more call after layout settles
-                        setTimeout(() => window.adjustPageForSidebar(), 150);
+                        setTimeout(() => adjustFn(), 150);
                     });
                 }
             })
