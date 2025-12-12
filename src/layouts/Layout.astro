@@ -589,36 +589,66 @@ window.onresize = () => {
    If sidebar is taller than main content, add padding-bottom to the content wrapper
    so scrolling to page bottom reveals the entire sidebar. This fixes pages where
    sidebar gets cut off because the main column is shorter. */
+
+let isAdjusting = false;
+let lastPaddingValue = '';
+
 function adjustPageForSidebar() {
+	if (isAdjusting) return; // Prevent re-entry to avoid feedback loops
+
 	try {
 		const sidebar = document.getElementById('sidebar');
 		const contentWrapper = document.getElementById('content-wrapper');
 		if (!sidebar || !contentWrapper) return;
 
 		const sidebarHeight = sidebar.offsetHeight;
-		const contentHeight = contentWrapper.offsetHeight;
+		// Get content height without the padding we might have added
+		const currentPadding = parseFloat(contentWrapper.style.paddingBottom) || 0;
+		const contentHeight = contentWrapper.offsetHeight - currentPadding;
 
+		let newPadding = '';
 		if (sidebarHeight > contentHeight) {
 			const delta = sidebarHeight - contentHeight + 24;
-			contentWrapper.style.paddingBottom = `${delta}px`;
-		} else {
-			contentWrapper.style.paddingBottom = '';
+			newPadding = `${delta}px`;
+		}
+
+		// Only update if the value actually changed to prevent unnecessary reflows
+		if (newPadding !== lastPaddingValue) {
+			isAdjusting = true;
+			lastPaddingValue = newPadding;
+			contentWrapper.style.paddingBottom = newPadding;
+			// Release lock after layout settles
+			requestAnimationFrame(() => {
+				isAdjusting = false;
+			});
 		}
 	} catch (e) {
+		isAdjusting = false;
 		// noop
 	}
 }
 
+let scheduledUpdate = null;
 function scheduleSidebarPaddingUpdate() {
-	requestAnimationFrame(adjustPageForSidebar);
+	if (scheduledUpdate) {
+		cancelAnimationFrame(scheduledUpdate);
+	}
+	scheduledUpdate = requestAnimationFrame(() => {
+		scheduledUpdate = null;
+		adjustPageForSidebar();
+	});
 }
 
 window.addEventListener('resize', scheduleSidebarPaddingUpdate);
 
 if (window?.swup?.hooks) {
-	window.swup.hooks.on('content:replace', scheduleSidebarPaddingUpdate);
+	window.swup.hooks.on('content:replace', () => {
+		lastPaddingValue = ''; // Reset on page change
+		scheduleSidebarPaddingUpdate();
+	});
 	window.swup.hooks.on('visit:end', () => setTimeout(scheduleSidebarPaddingUpdate, 120));
 	window.swup.hooks.on('page:view', () => {
+		lastPaddingValue = ''; // Reset on page change
 		scheduleSidebarPaddingUpdate();
 		setTimeout(scheduleSidebarPaddingUpdate, 120);
 	});

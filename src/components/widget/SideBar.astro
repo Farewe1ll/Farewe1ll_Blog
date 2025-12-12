@@ -92,35 +92,64 @@ const sidebarTopPreserveKey =
 
 	<script is:inline data-swup-reload-script defer>
 		(() => {
+			// Debounce helper to prevent rapid repeated calls
+			let paddingUpdateTimer = null;
+			let isUpdating = false;
+
 			const schedulePaddingUpdate = () => {
 				if (typeof window === "undefined") return;
-				window.requestAnimationFrame(() => {
+
+				// Debounce: cancel previous pending update
+				if (paddingUpdateTimer) {
+					cancelAnimationFrame(paddingUpdateTimer);
+				}
+
+				paddingUpdateTimer = window.requestAnimationFrame(() => {
+					paddingUpdateTimer = null;
+					if (isUpdating) return; // Prevent re-entry
+					isUpdating = true;
+
 					if (typeof window.adjustPageForSidebar === "function") {
 						window.adjustPageForSidebar();
 					}
+
+					// Release lock after a short delay to allow layout to settle
+					setTimeout(() => { isUpdating = false; }, 100);
 				});
 			};
 
 			const setupSidebarPaddingSync = () => {
 				const sidebarRoot = document.getElementById("sidebar");
-				const contentWrapper = document.getElementById("content-wrapper");
 				const ensurePadding = () => {
 					schedulePaddingUpdate();
-					setTimeout(schedulePaddingUpdate, 120);
+					setTimeout(schedulePaddingUpdate, 150);
 				};
 
 				ensurePadding();
 				document.addEventListener("swup:page:view", ensurePadding);
 
 				let resizeObserver;
+				let resizeDebounceTimer = null;
 				if (typeof ResizeObserver !== "undefined") {
-					resizeObserver = new ResizeObserver(() => schedulePaddingUpdate());
+					resizeObserver = new ResizeObserver(() => {
+						// Debounce ResizeObserver callbacks to prevent rapid firing
+						if (resizeDebounceTimer) {
+							clearTimeout(resizeDebounceTimer);
+						}
+						resizeDebounceTimer = setTimeout(() => {
+							resizeDebounceTimer = null;
+							schedulePaddingUpdate();
+						}, 50);
+					});
+					// Only observe sidebar, NOT contentWrapper
+					// because adjustPageForSidebar modifies contentWrapper's padding
+					// which would cause a feedback loop
 					if (sidebarRoot) resizeObserver.observe(sidebarRoot);
-					if (contentWrapper) resizeObserver.observe(contentWrapper);
 				}
 
 				return () => {
 					document.removeEventListener("swup:page:view", ensurePadding);
+					if (resizeDebounceTimer) clearTimeout(resizeDebounceTimer);
 					resizeObserver?.disconnect?.();
 				};
 			};
@@ -198,8 +227,18 @@ const sidebarTopPreserveKey =
 				].filter((el) => el instanceof HTMLElement);
 
 				let resizeObserver;
+				let tocResizeDebounceTimer = null;
 				if (typeof ResizeObserver !== "undefined") {
-					resizeObserver = new ResizeObserver(() => scheduleUpdate());
+					resizeObserver = new ResizeObserver(() => {
+						// Debounce to prevent rapid firing during animations
+						if (tocResizeDebounceTimer) {
+							clearTimeout(tocResizeDebounceTimer);
+						}
+						tocResizeDebounceTimer = setTimeout(() => {
+							tocResizeDebounceTimer = null;
+							scheduleUpdate();
+						}, 50);
+					});
 					roTargets.forEach(target => resizeObserver?.observe(target));
 				}
 
@@ -209,6 +248,9 @@ const sidebarTopPreserveKey =
 				return () => {
 					if (rafHandle) {
 						cancelAnimationFrame(rafHandle);
+					}
+					if (tocResizeDebounceTimer) {
+						clearTimeout(tocResizeDebounceTimer);
 					}
 					window.removeEventListener("resize", resizeHandler);
 					document.removeEventListener("swup:page:view", pageViewHandler);
