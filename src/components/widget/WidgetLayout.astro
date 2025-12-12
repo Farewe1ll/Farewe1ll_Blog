@@ -54,16 +54,12 @@ const classes = ["block", "w-full", "pb-4", "card-base", className]
                 wrapper!.classList.remove('collapsed');
                 btn!.classList.add('hidden');
 
-                // Trigger layout adjustment after expansion with a slight delay
-                // to let the layout settle before recalculating
+                // Trigger layout adjustment after expansion
+                // Wait for layout to fully settle before recalculating
                 if (typeof window.adjustPageForSidebar === "function") {
                     const adjustFn = window.adjustPageForSidebar;
-                    // Use requestAnimationFrame to batch with browser's layout cycle
-                    requestAnimationFrame(() => {
-                        adjustFn();
-                        // One more call after layout settles
-                        setTimeout(() => adjustFn(), 150);
-                    });
+                    // Use setTimeout to wait for layout to settle after the DOM change
+                    setTimeout(() => adjustFn(), 200);
                 }
             })
         }
