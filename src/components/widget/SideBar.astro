@@ -122,7 +122,13 @@ const sidebarTopPreserveKey =
 				const sidebarRoot = document.getElementById("sidebar");
 				const ensurePadding = () => {
 					schedulePaddingUpdate();
+					// Multiple delayed updates to catch CSS animations and transitions
+					// onload-animation has animation-delay: 200ms
+					// transition-all has duration-700 (700ms)
 					setTimeout(schedulePaddingUpdate, 150);
+					setTimeout(schedulePaddingUpdate, 300);
+					setTimeout(schedulePaddingUpdate, 500);
+					setTimeout(schedulePaddingUpdate, 800);
 				};
 
 				ensurePadding();
@@ -147,10 +153,32 @@ const sidebarTopPreserveKey =
 					if (sidebarRoot) resizeObserver.observe(sidebarRoot);
 				}
 
+				// MutationObserver to detect sidebar-bottom visibility changes
+				// This catches when it transitions from hidden to visible
+				let mutationObserver;
+				const sidebarBottom = document.getElementById("sidebar-bottom");
+				if (sidebarBottom && typeof MutationObserver !== "undefined") {
+					mutationObserver = new MutationObserver((mutations) => {
+						for (const mutation of mutations) {
+							if (mutation.type === 'attributes' &&
+								(mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
+								// Sidebar-bottom visibility may have changed
+								ensurePadding();
+								break;
+							}
+						}
+					});
+					mutationObserver.observe(sidebarBottom, {
+						attributes: true,
+						attributeFilter: ['class', 'style']
+					});
+				}
+
 				return () => {
 					document.removeEventListener("swup:page:view", ensurePadding);
 					if (resizeDebounceTimer) clearTimeout(resizeDebounceTimer);
 					resizeObserver?.disconnect?.();
+					mutationObserver?.disconnect?.();
 				};
 			};
 

@@ -529,6 +529,9 @@ const setup = () => {
 			heightExtend.classList.remove('hidden')
 		}
 		syncSidebarLayout();
+		// Additional delayed sync to catch animations
+		setTimeout(syncSidebarLayout, 300);
+		setTimeout(syncSidebarLayout, 800);
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {
@@ -538,6 +541,9 @@ const setup = () => {
 			}
 		}, 200)
 		syncSidebarLayout();
+		// Additional delayed sync to catch animations
+		setTimeout(syncSidebarLayout, 300);
+		setTimeout(syncSidebarLayout, 800);
 	});
 }
 if (window?.swup?.hooks) {
@@ -592,6 +598,7 @@ window.onresize = () => {
 
 let isAdjusting = false;
 let lastPaddingValue = '';
+let lastSidebarHeight = 0;
 
 function adjustPageForSidebar() {
 	if (isAdjusting) return; // Prevent re-entry to avoid feedback loops
@@ -601,21 +608,43 @@ function adjustPageForSidebar() {
 		const contentWrapper = document.getElementById('content-wrapper');
 		if (!sidebar || !contentWrapper) return;
 
+		// Get the actual computed height of all sidebar contents
 		const sidebarHeight = sidebar.offsetHeight;
+
+		// Also check if sidebar-bottom (tags) is visible and calculate its real height
+		const sidebarBottom = document.getElementById('sidebar-bottom');
+		const tagsWidget = document.getElementById('tags');
+		let additionalHeight = 0;
+
+		if (sidebarBottom && window.getComputedStyle(sidebarBottom).display !== 'none') {
+			// If tags widget exists and is collapsed, we need to account for potential expansion
+			if (tagsWidget) {
+				const tagsWrapper = tagsWidget.closest('.collapse-wrapper');
+				if (tagsWrapper && !tagsWrapper.classList.contains('collapsed')) {
+					// Tags is expanded, get its full height
+					additionalHeight = 0; // Already included in sidebarHeight
+				}
+			}
+		}
+
+		const totalSidebarHeight = sidebarHeight + additionalHeight;
+
 		// Get content height without the padding we might have added
 		const currentPadding = parseFloat(contentWrapper.style.paddingBottom) || 0;
 		const contentHeight = contentWrapper.offsetHeight - currentPadding;
 
 		let newPadding = '';
-		if (sidebarHeight > contentHeight) {
-			const delta = sidebarHeight - contentHeight + 24;
+		if (totalSidebarHeight > contentHeight) {
+			const delta = totalSidebarHeight - contentHeight + 24;
 			newPadding = `${delta}px`;
 		}
 
-		// Only update if the value actually changed to prevent unnecessary reflows
-		if (newPadding !== lastPaddingValue) {
+		// Update if value changed OR if sidebar height changed significantly
+		const heightChanged = Math.abs(totalSidebarHeight - lastSidebarHeight) > 10;
+		if (newPadding !== lastPaddingValue || heightChanged) {
 			isAdjusting = true;
 			lastPaddingValue = newPadding;
+			lastSidebarHeight = totalSidebarHeight;
 			contentWrapper.style.paddingBottom = newPadding;
 			// Release lock after layout settles
 			requestAnimationFrame(() => {
@@ -644,13 +673,21 @@ window.addEventListener('resize', scheduleSidebarPaddingUpdate);
 if (window?.swup?.hooks) {
 	window.swup.hooks.on('content:replace', () => {
 		lastPaddingValue = ''; // Reset on page change
+		lastSidebarHeight = 0; // Reset sidebar height tracking
 		scheduleSidebarPaddingUpdate();
 	});
 	window.swup.hooks.on('visit:end', () => setTimeout(scheduleSidebarPaddingUpdate, 120));
 	window.swup.hooks.on('page:view', () => {
 		lastPaddingValue = ''; // Reset on page change
+		lastSidebarHeight = 0; // Reset sidebar height tracking
 		scheduleSidebarPaddingUpdate();
+		// Multiple delayed updates to catch CSS animations and transitions
+		// onload-animation has animation-delay: 200ms
+		// transition-all has duration-700 (700ms)
 		setTimeout(scheduleSidebarPaddingUpdate, 120);
+		setTimeout(scheduleSidebarPaddingUpdate, 300);
+		setTimeout(scheduleSidebarPaddingUpdate, 500);
+		setTimeout(scheduleSidebarPaddingUpdate, 800);
 	});
 }
 
