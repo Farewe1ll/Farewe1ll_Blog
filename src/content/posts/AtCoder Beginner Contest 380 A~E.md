@@ -3,7 +3,7 @@ title: 'AtCoder Beginner Contest 380 A~E'
 published: 2025-01-09
 description: 'AtCoder Beginner Contest 380 VP 解题报告'
 image: ''
-tags: ['Atcoder', 'AtCoder Beginner Contest', 'cpp', 'Virtual Participation']
+tags: ['Atcoder', 'AtCoder Beginner Contest', 'C++', 'Virtual Participation', 'Competitive Programming']
 category: 'Algorithm'
 draft: false
 series: 'Atcoder'

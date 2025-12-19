@@ -3,7 +3,7 @@ title: 'Codeforces Round 992 (Div. 2) A~E'
 published: 2025-01-14
 description: 'Codeforces Round 992 (Div. 2) VP 解题报告'
 image: ''
-tags: ['Codeforces', 'Div. 2', 'cpp', 'Virtual Participation']
+tags: ['Codeforces', 'Div. 2', 'C++', 'Virtual Participation', 'Competitive Programming']
 category: 'Algorithm'
 draft: false
 series: 'Codeforces'

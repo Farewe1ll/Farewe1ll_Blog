@@ -3,10 +3,10 @@ title: '高级统计方法 第一轮学习 Chapter 3'
 published: 2025-11-22
 description: '高级统计方法 第一轮学习 Chapter 3 线性回归'
 image: ''
-tags: ['Statistical Learning']
-category: 'Study'
+tags: ['Statistical Learning', 'Maths']
+category: 'Courses'
 draft: false
-series: 'Maths'
+series: 'Stat-Learning'
 ---
 
 # 高级统计方法 第一轮学习 Chapter 3 线性回归

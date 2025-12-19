@@ -3,10 +3,10 @@ title: '高级统计方法 第一轮学习 Chapter 1'
 published: 2025-11-18
 description: '高级统计方法 第一轮学习 Chapter 1 导论'
 image: ''
-tags: ['Statistical Learning']
-category: 'Study'
+tags: ['Statistical Learning', 'Maths']
+category: 'Courses'
 draft: false
-series: 'Maths'
+series: 'Stat-Learning'
 ---
 
 # 高级统计方法 第一轮学习 Chapter 1 导论

@@ -4,10 +4,10 @@ published: 2025-11-29
 description: '高级统计方法 R 语言总结'
 image: ''
 tags: ['Statistical Learning', 'R Language']
-category: 'Study'
+category: 'Courses'
 draft: false
 lang: ''
-series: 'Maths'
+series: 'Stat-Learning'
 ---
 
 # 高级统计方法 R 语言总结
