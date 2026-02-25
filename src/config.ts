@@ -32,7 +32,7 @@ export const siteConfig: SiteConfig = {
 	favicon: [
 		// Leave this array empty to use the default favicon
 		{
-			src: "https://cn.cravatar.com/avatar/8e405a63aeffe0f7f7de0d072d066984d85552d0f3a1ff6082301d7becec8080?s=512", // Path of the favicon, relative to the /public directory
+			src: "https://avatar.farewe1ll.top", // Path of the favicon, relative to the /public directory
 			//   theme: 'light',              // (Optional) Either 'light' or 'dark', set only if you have different favicons for light and dark mode
 			//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
 		},
@@ -48,7 +48,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Friends,
 		{
 			name: "Gravatar",
-			url: "https://cn.gravatar.com/mortallyfuturistic36ba6ede92",
+			url: "https://cn.gravatar.com/farewe1ll",
 			external: true,
 		},
 		{
@@ -61,7 +61,7 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar:
-		"https://cn.cravatar.com/avatar/8e405a63aeffe0f7f7de0d072d066984d85552d0f3a1ff6082301d7becec8080?s=1024", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+		"https://avatar.farewe1ll.top", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "Farewe1ll 山竹",
 	bio: "拨雪寻春，烧灯续昼。",
 	links: [
@@ -88,7 +88,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "material-symbols:mail",
-			url: "mailto:me@Farewe1ll.top",
+			url: "mailto:me@Farewe1ll.com",
 		},
 	],
 };
