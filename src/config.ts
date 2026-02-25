@@ -63,7 +63,7 @@ export const profileConfig: ProfileConfig = {
 	avatar:
 		"https://avatar.farewe1ll.top", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "Farewe1ll 山竹",
-	bio: "拨雪寻春，烧灯续昼。",
+	bio: "撥雪尋春，燒燈續晝。",
 	links: [
 		{
 			name: "QQ",
