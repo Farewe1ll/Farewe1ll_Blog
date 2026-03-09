@@ -65,9 +65,9 @@ export const profileConfig: ProfileConfig = {
 	bio: "撥雪尋春，燒燈續晝。",
 	links: [
 		{
-			name: "QQ",
-			icon: "fa6-brands:qq",
-			url: "mqq://im/chat?chat_type=wpa&uin=2756681306&version=1&src_type=web",
+			name: "Telegram",
+			icon: "fa6-brands:telegram",
+			url: "https://t.me/Farewe1ll",
 		},
 		{
 			name: "bilibili",
@@ -75,14 +75,14 @@ export const profileConfig: ProfileConfig = {
 			url: "https://space.bilibili.com/681235442",
 		},
 		{
-			name: "Telegram",
-			icon: "fa6-brands:telegram",
-			url: "https://t.me/Farewe1ll",
-		},
-		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
 			url: "https://github.com/Farewe1ll",
+		},
+		{
+			name: "Steam",
+			icon: "fa6-brands:steam",
+			url: "https://steamcommunity.com/id/farewe1ll/",
 		},
 		{
 			name: "Email",
