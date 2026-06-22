@@ -3,7 +3,7 @@ title: '高级统计方法 第一轮学习 Chapter 8'
 published: 2025-11-25
 description: '高级统计方法 第一轮学习 Chapter 8 基于树的方法'
 image: ''
-tags: ['Statistical Learning', 'Maths']
+tags: ['Statistical_Learning', 'Maths']
 category: 'Courses'
 draft: false
 series: 'Stat-Learning'

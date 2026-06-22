@@ -1,16 +1,16 @@
 ---
-title: 从零开始的 RL 与 RLHF——GRPO
+title: 从零开始的 Post Training 3——GRPO
 published: 2026-06-21
-description: 'RL 与 RLHF 的入门学习笔记'
+description: 'Post Training 的入门学习笔记'
 image: ''
-tags: ['Deep Learning', 'RL', 'RLHF', 'GRPO']
+tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'GRPO']
 category: 'Research'
 draft: false
 lang: ''
-series: 'Reinforcement Learning'
+series: 'Post Training'
 ---
 
-# 从零开始的 RL 与 RLHF——GRPO
+# 从零开始的 Post Training 3
 
 ## GRPO 算法
 

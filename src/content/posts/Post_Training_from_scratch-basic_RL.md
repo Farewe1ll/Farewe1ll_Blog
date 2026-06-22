@@ -1,16 +1,16 @@
 ---
-title: 从零开始的 RL 与 RLHF——基础 RL 概念
+title: 从零开始的 Post Training 0——基础 RL 概念
 published: 2026-06-18
-description: 'RL 与 RLHF 的入门学习笔记'
+description: 'Post Training 的入门学习笔记'
 image: ''
-tags: ['Deep Learning', 'RL', 'RLHF']
+tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF']
 category: 'Research'
 draft: false
 lang: ''
-series: 'Reinforcement Learning'
+series: 'Post Training'
 ---
 
-# 从零开始的 RL 与 RLHF
+# 从零开始的 Post Training 0
 
 ## RL 基础：环境、状态、动作、奖励
 

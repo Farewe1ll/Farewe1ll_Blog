@@ -3,7 +3,7 @@ title: 'Codeforces Round 981 (Div. 3)'
 published: 2024-10-25
 description: 'Codeforces Round 981 (Div. 3) 解题报告'
 image: ''
-tags: ['Codeforces', 'Div. 3', 'C++', 'Competitive Programming']
+tags: ['Codeforces', 'Div._3', 'C++', 'Competitive_Programming']
 category: 'Algorithm'
 draft: false
 series: 'Codeforces'

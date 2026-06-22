@@ -1,16 +1,16 @@
 ---
-title: 从零开始的 RL 与 RLHF——DPO
+title: 从零开始的 Post Training 2——DPO
 published: 2026-06-20
-description: 'RL 与 RLHF 的入门学习笔记'
+description: 'Post Training 的入门学习笔记'
 image: ''
-tags: ['Deep Learning', 'RL', 'RLHF']
+tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'DPO']
 category: 'Research'
 draft: false
 lang: ''
-series: 'Reinforcement Learning'
+series: 'Post Training'
 ---
 
-# 从零开始的 RL 与 RLHF——DPO
+# 从零开始的 Post Training 2
 
 ## DPO 算法
 

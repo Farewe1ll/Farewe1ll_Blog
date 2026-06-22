@@ -3,7 +3,7 @@ title: '高级统计方法 第一轮学习 Chapter 4'
 published: 2025-11-22
 description: '高级统计方法 第一轮学习 Chapter 4 分类'
 image: ''
-tags: ['Statistical Learning', 'Maths']
+tags: ['Statistical_Learning', 'Maths']
 category: 'Courses'
 draft: false
 series: 'Stat-Learning'

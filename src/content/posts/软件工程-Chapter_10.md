@@ -3,7 +3,7 @@ title: '软件工程 Chapter 10 交互设计'
 published: 2026-1-5
 description: '软件工程学习记录 Chapter 10 交互设计'
 image: ''
-tags: ['Software Engineering', 'SE']
+tags: ['Software_Engineering', 'SE']
 category: 'Courses'
 draft: false
 lang: ''

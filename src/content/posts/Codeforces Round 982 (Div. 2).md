@@ -3,7 +3,7 @@ title: 'Codeforces Round 982 (Div. 2)'
 published: 2024-10-27
 description: 'Codeforces Round 982 (Div. 2) 解题报告'
 image: ''
-tags: ['Codeforces', 'Div. 2', 'C++', 'Competitive Programming']
+tags: ['Codeforces', 'Div._2', 'C++', 'Competitive_Programming']
 category: 'Algorithm'
 draft: false
 series: 'Codeforces'

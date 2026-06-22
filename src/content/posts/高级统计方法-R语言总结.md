@@ -3,7 +3,7 @@ title: '高级统计方法 R 语言总结'
 published: 2025-11-29
 description: '高级统计方法 R 语言总结'
 image: ''
-tags: ['Statistical Learning', 'R Language']
+tags: ['Statistical_Learning', 'R_Language']
 category: 'Courses'
 draft: false
 lang: ''

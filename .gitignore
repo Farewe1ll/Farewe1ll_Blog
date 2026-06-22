@@ -26,5 +26,10 @@ bun.lockb
 yarn.lock
 
 .vscode/
+.obsidian/
+.claudian/
 
 prompt.txt
+
+zhihu/
+copilot/

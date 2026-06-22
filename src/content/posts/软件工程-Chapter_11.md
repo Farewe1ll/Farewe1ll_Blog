@@ -3,7 +3,7 @@ title: '软件工程 Chapter 11 软件测试'
 published: 2026-1-5
 description: '软件工程学习记录 Chapter 11 软件测试'
 image: ''
-tags: ['Software Engineering', 'SE']
+tags: ['Software_Engineering', 'SE']
 category: 'Courses'
 draft: false
 lang: ''

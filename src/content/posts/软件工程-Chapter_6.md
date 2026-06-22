@@ -3,7 +3,7 @@ title: '软件工程 Chapter 6 代码生成'
 published: 2026-1-5
 description: '软件工程学习记录 Chapter 6 代码生成'
 image: ''
-tags: ['Software Engineering', 'SE']
+tags: ['Software_Engineering', 'SE']
 category: 'Courses'
 draft: false
 lang: ''

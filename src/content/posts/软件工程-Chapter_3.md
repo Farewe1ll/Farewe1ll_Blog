@@ -3,7 +3,7 @@ title: '软件工程 Chapter 3 需求分析'
 published: 2025-12-26
 description: '软件工程学习记录 Chapter 3 需求分析'
 image: ''
-tags: ['Software Engineering', 'SE']
+tags: ['Software_Engineering', 'SE']
 category: 'Courses'
 draft: false
 lang: ''

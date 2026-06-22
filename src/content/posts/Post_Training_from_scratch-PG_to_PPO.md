@@ -1,16 +1,16 @@
 ---
-title: 从零开始的 RL 与 RLHF——从 Policy Gradient 到 PPO
+title: 从零开始的 Post Training 1——从 Policy Gradient 到 PPO
 published: 2026-06-18
-description: 'RL 与 RLHF 的入门学习笔记'
+description: 'Post Training 的入门学习笔记'
 image: ''
-tags: ['Deep Learning', 'RL', 'RLHF', 'Policy Gradient', 'Actor-Critic', 'PPO']
+tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'Policy_Gradient', 'Actor-Critic', 'PPO']
 category: 'Research'
 draft: false
 lang: ''
-series: 'Reinforcement Learning'
+series: 'Post Training'
 ---
 
-# 从零开始的 RL 与 RLHF——从 Policy Gradient 到 PPO
+# 从零开始的 Post Training 1
 
 ## Policy Gradient
 

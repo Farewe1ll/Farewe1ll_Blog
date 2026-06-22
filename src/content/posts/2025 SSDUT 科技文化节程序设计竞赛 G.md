@@ -3,7 +3,7 @@ title: '2025 SSDUT 科技文化节程序设计竞赛 G'
 published: 2025-04-26
 description: '2025 SSDUT 科技文化节程序设计竞赛 G 题解'
 image: ''
-tags: ['校赛', 'SSDUT', 'C++', '笛卡尔树', 'Competitive Programming']
+tags: ['校赛', 'SSDUT', 'C++', '笛卡尔树', 'Competitive_Programming']
 category: 'Algorithm'
 draft: false
 series: 'SSDUT Contests'
