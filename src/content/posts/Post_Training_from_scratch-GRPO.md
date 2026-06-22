@@ -1,7 +1,7 @@
 ---
 title: 从零开始的 Post Training 3——GRPO
 published: 2026-06-21
-description: 'Post Training 的入门学习笔记'
+description: 'Post Training 的入门学习笔记 GRPO 篇'
 image: ''
 tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'GRPO']
 category: 'Research'

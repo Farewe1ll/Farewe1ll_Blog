@@ -1,7 +1,7 @@
 ---
 title: 从零开始的 Post Training 2——DPO
 published: 2026-06-20
-description: 'Post Training 的入门学习笔记'
+description: 'Post Training 的入门学习笔记 DPO 篇'
 image: ''
 tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'DPO']
 category: 'Research'

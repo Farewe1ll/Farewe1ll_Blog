@@ -1,8 +1,8 @@
 ---
 title: 从零开始的 Post Training 4——OPD
 published: 2026-06-22
-description: Post Training 的入门学习笔记
-image: ""
+description: 'Post Training 的入门学习笔记 OPD 篇'
+image: ''
 tags:
   - Deep_Learning
   - Post_Training
