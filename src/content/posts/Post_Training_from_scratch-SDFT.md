@@ -112,19 +112,19 @@ $$
 则我们的目标实际上为
 
 $$
-L(\theta) = E_{(x, c) \sim D} \left[ E_{\hat{y} \sim \pi_\theta(\cdot|x)} l_{\theta}(\hat{y}) \right]
+J(\theta) = E_{(x, c) \sim D} \left[ E_{\hat{y} \sim \pi_\theta(\cdot|x)} l_{\theta}(\hat{y}) \right]
 $$
 
 对于外层的期望，与 $\theta$ 无关，因此我们可以将梯度传递到内层的期望，即
 
 $$
-\nabla L(\theta) = E_{(x, c) \sim D} \left[ \nabla_\theta E_{\hat{y} \sim \pi_\theta(\cdot|x)} l_{\theta}(\hat{y}) \right]
+\nabla J(\theta) = E_{(x, c) \sim D} \left[ \nabla_\theta E_{\hat{y} \sim \pi_\theta(\cdot|x)} l_{\theta}(\hat{y}) \right]
 $$
 
 里面这个参数实际上分为两个部分：
 
 $$
-\nabla_\theta E_{\hat{y} \sim \pi_\theta(\cdot|x)} l_{\theta}(\hat{y}) = E_{\hat{y} \sim \pi_\theta(\cdot|x)} \left[ l_{\theta}(\hat{y}) \nabla_\theta \log \pi_\theta(\hat{y}|x) + \nabla_\theta l_{\theta}(\hat{y}) \right]
+\nabla J(\theta) = E_{(x, c) \sim D} \left[ E_{\hat{y} \sim \pi_\theta(\cdot|x)} \left[ l_{\theta}(\hat{y}) \nabla_\theta \log \pi_\theta(\hat{y}|x) + \nabla_\theta l_{\theta}(\hat{y}) \right] \right]
 $$
 
 前者即为轨迹梯度（Trajectory Gradient），后者即为蒸馏梯度（Distillation Gradient）。
@@ -138,18 +138,99 @@ $$
 在上节 OPSD 中，我们的目标函数为：
 
 $$
-L(\theta) = \mathbb{E}_{(x, y^*) \sim D} \left[ \mathbb{E}_{\hat{y} \sim \pi_\theta(\cdot|x)} \frac{1}{\lvert \hat{y} \rvert} \sum_{n = 1}^{\lvert \hat{y} \rvert} \left[ JSD_{\beta}(\pi_T(\cdot|x) \parallel \pi_\theta(\cdot|x))(\hat{y}) \right] \right]
+J(\theta) = \mathbb{E}_{(x, y^*) \sim D} \left[ \mathbb{E}_{\hat{y} \sim \pi_\theta(\cdot|x)} \frac{1}{\lvert \hat{y} \rvert} \sum_{n = 1}^{\lvert \hat{y} \rvert} \left[ JSD_{\beta}(\pi_T(\cdot|x) \parallel \pi_\theta(\cdot|x))(\hat{y}) \right] \right]
 $$
 
 这里优化的常常为蒸馏梯度。即在学生模型 rollout 轨迹的时候，不记录如何从 $\theta$ 中采样 $\hat{y}$，即：
 
 $$
-\nabla L(\theta) = \mathbb{E}_{(x, y^*) \sim D} \left[ \nabla_{\theta} \mathbb{E}_{\hat{y} \sim \pi_\theta(\cdot|x)} \frac{1}{\lvert \hat{y} \rvert} \sum_{n = 1}^{\lvert \hat{y} \rvert} \left[ JSD_{\beta}(\pi_T(\cdot|x) \parallel \pi_\theta(\cdot|x))(\hat{y}) \right] \right]
+\nabla J(\theta) = \mathbb{E}_{(x, y^*) \sim D} \left[\mathbb{E}_{\hat{y} \sim \pi_\theta(\cdot|x)} \frac{1}{\lvert \hat{y} \rvert} \sum_{n = 1}^{\lvert \hat{y} \rvert} \left[ \nabla_{\theta} JSD_{\beta}(\pi_T(\cdot|x) \parallel \pi_\theta(\cdot|x))(\hat{y}) \right] \right]
 $$
 
 具体来说，打掉轨迹梯度或者蒸馏梯度都需要进行 stop-gradiant。
 
-这里还有梯度分析器和EMA没写完 累晕过去了起来再写吧
+我们可以注意到，在上式中其实最后直接在对散度进行求梯度。实际上这个散度的位置就已经去掉了轨迹梯度：
+
+$$
+\begin{aligned}
+\nabla J(\theta) &= E_{(x, c) \sim D} \left[ E_{\hat{y} \sim \pi_\theta(\cdot|x)} \left[\nabla_\theta l_{\theta}(\hat{y}) \right] \right] \\
+&= E_{(x, c) \sim D} \left[ E_{\hat{y} \sim \pi_\theta(\cdot|x)} \left[ \nabla_\theta D(\pi_T(\cdot|x, c) \parallel \pi_\theta(\cdot|x))(\hat{y}) \right] \right]
+\end{aligned}
+$$
+
+在 SDFT 中，我们也可以有相似的式子，不过是要对 RKL 进行求梯度：
+
+$$
+\nabla J(\theta) = \mathbb{E}_{(x, c) \sim D} \left[ \mathbb{E}_{\hat{y} \sim \pi_\theta(\cdot|x)} \frac{1}{\lvert \hat{y} \rvert} \sum_{n = 1}^{\lvert \hat{y} \rvert} \left[ \nabla_{\theta} D_{RKL}(\pi_T(\cdot|x, c) \parallel \pi_\theta(\cdot|x)) \right] \right]
+$$
+
+在这里，论文通过展开 RKL 的定义，得到了一个更为直观的形式：
+
+$$
+\nabla D_{RKL}(\pi_T(\cdot|x, c) \parallel \pi_\theta(\cdot|x)) = \nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_\theta(v) - \nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_T(v)
+$$
+
+对第一项进行处理：
+
+$$
+\begin{aligned}
+\nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_\theta(v) &= \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_\theta(v) + \sum_{v \in \mathcal V} \pi_\theta(v) \nabla_\theta \ln \pi_\theta(v) \\
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_\theta(v) + \sum_{v \in \mathcal V} \pi_\theta(v) \frac{\nabla_\theta \pi_\theta(v)}{\pi_\theta(v)} \\
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_\theta(v) + \sum_{v \in \mathcal V} \nabla_\theta \pi_\theta(v)
+\end{aligned}
+$$
+
+由于我们有
+
+$$
+\sum_{v \in \mathcal V} \pi_\theta(v) = 1
+$$
+
+故
+
+$$
+\nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_\theta(v) = \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_\theta(v)
+$$
+
+然后处理第二项：
+
+$$
+\nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_T(v) = \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_T(v) + \sum_{v \in \mathcal V} \pi_\theta(v) \nabla_\theta \ln \pi_T(v)
+$$
+
+由于 $\pi_T$ 与 $\theta$ 无关，故
+
+$$
+\nabla_\theta \ln \pi_T(v) = 0
+$$
+
+故：
+
+$$
+\nabla_\theta \sum_{v \in \mathcal V} \pi_\theta(v) \ln \pi_T(v) = \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_T(v)
+$$
+
+所以
+
+$$
+\begin{aligned}
+\nabla D_{RKL}(\pi_T(\cdot|x, c) \parallel \pi_\theta(\cdot|x)) &= \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_\theta(v) - \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \ln \pi_T(v) \\
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta \pi_\theta(v) \right] \left[ \ln \pi_\theta(v) - \ln \pi_T(v) \right] \\
+&= \sum_{v \in \mathcal V} \ln \frac{\pi_\theta(v)}{\pi_T(v)} \nabla_\theta \pi_\theta(v)
+\end{aligned}
+$$
+
+这就是梯度分析器，即 analytic per-token estimator。这个表达式的本质就是 RKL 下的 Full-vocab OPD 的梯度展开形式。
+
+### EMA
+
+在 OPSD 中，教师模型的参数是固定的，即 $\theta_T = \theta_0$。而在 SDFT 中，教师模型的参数是 EMA（Exponential Moving Average）形式的，即：
+
+$$
+\theta_T = \alpha \theta_T + (1 - \alpha) \theta
+$$
+
+即，教师模型的参数是学生模型参数的指数移动平均值。这样做的目的是为了让教师模型能够更好地适应学生模型的变化，从而提供更稳定的蒸馏信号。这里的 $\alpha$ 是一个超参数，通常取值在 $[0, 1]$ 之间，用于控制 EMA 的平滑程度。论文中，作者的范围为 $\alpha \in \left{ 0.01, 0.02, 0.05 \right}$。
 
 ### OPSD 与 SDFT 对比
 
