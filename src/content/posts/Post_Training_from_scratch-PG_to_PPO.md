@@ -1,5 +1,5 @@
 ---
-title: 从零开始的 Post Training 1——从 Policy Gradient 到 PPO
+title: 从零开始的 Post Training 1：从 Policy Gradient 到 PPO
 published: 2026-06-18
 description: 'Post Training 的入门学习笔记 从 Policy Gradient 到 PPO 篇'
 image: ''

@@ -1,5 +1,5 @@
 ---
-title: 从零开始的 Post Training 0——基本 RL 概念
+title: 从零开始的 Post Training 0：基本 RL 概念
 published: 2026-06-18
 description: 'Post Training 的入门学习笔记 基本 RL 概念篇'
 image: ''

@@ -1,5 +1,5 @@
 ---
-title: 从零开始的 Post Training 4——OPD
+title: 从零开始的 Post Training 4：OPD
 published: 2026-06-22
 description: 'Post Training 的入门学习笔记 OPD 篇'
 image: ''
@@ -32,76 +32,149 @@ Post Training 中，我们常使用 KL 散度来衡量两个概率分布之间�
 正向 KL 散度（Forward KL Divergence）定义为：
 
 $$
-D_{KL}(P_T || P_S) = E_{x \sim P_T} \left[ \log \frac{P_T(x)}{P_S(x)} \right]
+D_{KL}(\pi_T \parallel \pi_\theta) = E_{x \sim \pi_T} \left[ \log \frac{\pi_T(x)}{\pi_\theta(x)} \right]
 $$
 
-上式遍历的是目标分布 $P_T$ 的样本空间，因此它更关注目标分布中的高概率区域。如果在目标分布中存在一些高概率区域，而学生模型在这些区域的概率较低，那么正向 KL 散度会给予较大的惩罚。反之，如果学生模型在目标分布的低概率区域有较高的概率，那么正向 KL 散度的惩罚较小。
+上式遍历的是目标分布 $\pi_T$ 的样本空间，因此它更关注目标分布中的高概率区域。如果在目标分布中存在一些高概率区域，而学生模型在这些区域的概率较低，那么正向 KL 散度会给予较大的惩罚。反之，如果学生模型在目标分布的低概率区域有较高的概率，那么正向 KL 散度的惩罚较小。
 
-直观感受，可以感性理解为当我们期望正向 KL 散度最小时，变化的主动权在目标分布 $P_T$ 上，因此正向 KL 散度更倾向于覆盖目标分布的所有模式。FKL 又被称为 Mode-covering。
+直观感受，可以感性理解为当我们期望正向 KL 散度最小时，变化的主动权在目标分布 $\pi_T$ 上，因此正向 KL 散度更倾向于覆盖目标分布的所有模式。FKL 又被称为 Mode-covering。
 
-实际上 SFT 中优化的就是正向 KL 散度，因此 SFT 更倾向于覆盖目标分布的所有模式。
+实际上 SFT、标准 KD 中优化的就是正向 KL 散度。
 
 #### 反向 KL 散度
 
 反向 KL 散度（Reverse KL Divergence）定义为：
 
 $$
-D_{KL} = E_{x \sim P_S} \left[ \log \frac{P_S(x)}{P_T(x)} \right]
+D_{KL} = E_{x \sim \pi_\theta} \left[ \log \frac{\pi_\theta(x)}{\pi_T(x)} \right]
 $$
 
-上式遍历的是学生模型分布 $P_S$ 的样本空间，因此它更关注学生模型中的高概率区域。如果学生模型在某些区域的概率较高，而目标分布在这些区域的概率较低，那么反向 KL 散度会给予较大的惩罚。反之，如果学生模型在目标分布的高概率区域有较低的概率，那么反向 KL 散度的惩罚较小。
+上式遍历的是学生模型分布 $\pi_\theta$ 的样本空间，因此它更关注学生模型中的高概率区域。如果学生模型在某些区域的概率较高，而目标分布在这些区域的概率较低，那么反向 KL 散度会给予较大的惩罚。反之，如果学生模型在目标分布的高概率区域有较低的概率，那么反向 KL 散度的惩罚较小。
 
-直观感受，可以感性理解为当我们期望反向 KL 散度最小时，变化的主动权在学生模型 $P_S$ 上，因此反向 KL 散度更倾向于寻找目标分布中的一个模式。RKL 又被称为 Mode-seeking。
+直观感受，可以感性理解为当我们期望反向 KL 散度最小时，变化的主动权在学生模型 $\pi_\theta$ 上，因此反向 KL 散度更倾向于寻找目标分布中的一个模式。RKL 又被称为 Mode-seeking。
 
 实际上之前所讲的 RL 中优化的就是反向 KL 散度。
 
-### RL V.S OPD
+### 从 KD 到 OPD
 
-RL 的目标通常为：
+#### KD
 
-$$
-\pi^* = \arg\max_{\pi} E_{y \sim \pi(·|x)} [R(y, x)]
-$$
+后训练中，除了 SFT、RLHF 等方法外，还有一种方法叫做 KD（Knowledge Distillation），即知识蒸馏。KD 的目标是让学生模型尽可能地模仿教师模型的输出分布，从而提升学生模型的性能。
 
-即最大化策略 $\pi$ 在输入 $x$ 上生成输出 $y$ 的预期奖励 $R(y, x)$。
+KD 一般具有以下特点：
 
-但是在实践中，有时候会出现策略熵崩塌的情况出现，即策略 $\pi$ 过于集中在某些输出上，导致模型的多样性和泛化能力下降。之前在 PPO 的介绍中我们提到过，我们通常会在优化目标中加入一个熵正则项，其实就是为了防止策略熵崩塌的情况出现。
+- Off-policy：KD 的训练数据是固定的，通常来自于教师模型的输出分布。
 
-OPD 从另一个视角看待这个问题，定义目标分布 $\pi*$ 为一个 reward-tiltered distribution，即：
+- FKL： KD 的优化目标是最小化学生模型分布与教师模型分布之间的正向 KL 散度。即本质是在做 mode-covering。目前也有部分 KD 变体会使用 RKL，但大多数情况下，KD 使用的是 FKL。
 
-$$
-\pi^*(y|x) \propto \pi_{ref}(y|x) \exp(\frac{R(y, x)}{\beta})
-$$
+- 信号密度：KD 的训练信号常常是稠密的，在每个 token 处， 学生模型都可以获得教师模型的输出分布，从而进行优化。
 
-上式中，$\pi_{ref}$ 是一个参考策略，通常是一个预训练模型；$R(y, x)$ 是奖励函数；$\beta$ 是一个温度参数，用于控制奖励的影响程度。
-
-这里的 reward-tiltered distribution 本质上就是一个带非均匀分布的加权 softmax 分布。$\pi_{ref}(y|x)$ 作为一个先验分布，提供了生成输出的基本模式，而 $\exp(\frac{R(y, x)}{\beta})$ 则根据奖励函数对输出进行加权，使得高奖励的输出具有更高的概率。最后再进行归一化，使得 $\pi^*(y|x)$ 成为一个合法的概率分布。
-
-但是这里存在一个问题，即我们无法直接计算 $\pi^*(y|x)$，因为在计算 $\pi^*(y|x)$ 时，需要计算一个难以计算的归一化常数 $Z(x) = \sum_y \pi_{ref}(y|x) \exp(\frac{R(y, x)}{\beta})$，因为它涉及到对所有可能输出 $y$ 的求和。
-
-所以我们常常参数化一个近似的策略 $\pi_\theta$ 来近似 $\pi^*$。我们选择 FKL 还是 RKL 来优化 $\pi_\theta$ 和 $\pi^*$ 之间的距离呢？倘若是 FKL，我们需要在 $\pi^*$ 上取期望，这就需要我们能够从 $\pi^*$ 中采样或者计算 $\pi^*(y|x)$ 的概率，就算如重要性采样等方法来近似计算，也会面临计算量过大的问题。相反，如果我们选择 RKL，我们需要在 $\pi_\theta$ 上取期望，这就比较容易实现，因为我们可以直接从 $\pi_\theta$ 中采样，并且计算 $\pi_\theta(y|x)$ 的概率。这时候的优化目标可以写作：
+本质上，KD 的优化目标是最小化以下 Loss 函数：
 
 $$
-\begin{aligned}
-\theta^* &= \arg\min_{\theta} D_{KL}(\pi_\theta || \pi^*) \\
-&= \arg\min_{\theta} E_{y \sim \pi_\theta} \left[ \log \frac{\pi_\theta(y|x)}{\pi^*(y|x)} \right] \\
-&= \arg\min_{\theta} E_{y \sim \pi_\theta} \left[ \log \pi_\theta(y|x) - \log \pi_{ref}(y|x) - \frac{R(y, x)}{\beta} \right] \\
-&= \arg\max_{\theta} E_{y \sim \pi_{\theta}}[R(y, x)] - \beta * D_{KL}(\pi_\theta || \pi_{ref})
-\end{aligned}
+L(\theta) = E_{x \sim D} \left[ D_{KL}\left( \pi_T(x) \parallel \pi_\theta(x; \theta) \right) \right]
 $$
 
-### 散度度量方向的轴线
+#### OPD
 
-将上文中从 RKL 推导的优化目标，与之前在 RL 中提到的优化目标进行对比，我们可以有如下发现：
+我们注意到，上述的 KD 方法是 Off-policy 的，即学生模型所能学习到的信息是有限的，同时优化目标为 FKL，无法充分利用学生模型自身的探索能力。回忆之前的 RLHF 方法，尽管模型所得到的信号密度是稀疏的，但 RLHF 的优化目标为 RKL，能够充分利用学生模型自身的探索能力。于是我们可以考虑一种结合 KD 和 RLHF 优点的方法，即 OPD。
+
+我们希望 OPD 具有如下特点：
+
+- On-policy：OPD 的训练数据是动态的，来自于学生模型自身的输出分布。
+
+- RKL：OPD 的优化目标是最小化学生模型分布与教师模型分布之间的反向 KL 散度。即 OPD 在做 mode-seeking，充分利用学生模型自身的探索能力。
+
+- 信号密度：OPD 的训练信号是稠密的，在每个 token 处，学生模型都可以获得教师模型的输出分布，从而进行高效的训练。
+
+即，对于每次训练，我们让学生模型在给定输入 $x$ 的情况下，生成输出 $y^S \sim \pi_\theta(\cdot|x)$，然后逐 token 计算学生模型分布与教师模型分布之间的反向 KL 散度，最后对所有 token 的 Loss 进行求和，得到最终的优化目标：
+
+标准目标：最小化序列级反向 KL 散度
 
 $$
-\begin{aligned}
-\text{RL:} \quad \theta^* &= \arg\max_{\theta} E_{y \sim \pi_{\theta}}[R(y, x)] - \beta * D_{KL}(\pi_\theta || \pi_{ref}) \\
-\text{OPD:} \quad \theta^* &= \arg\min_{\theta} D_{KL}(\pi_\theta || \pi^*) \\
-&= \arg\max_{\theta} E_{y \sim \pi_{\theta}}[R(y, x)] - \beta * D_{KL}(\pi_\theta || \pi_{ref})
-\end{aligned}
+\mathcal{L}_{OPD}(\theta)=E_{x \sim D_x}\left[D_{KL}\left(\pi_\theta(\cdot|x)\parallel\pi_T(\cdot|x)\right)\right]
 $$
 
-即，本质上，从 RKL 出发的 OPD 优化目标与 RL 的优化目标是相同的，都是最大化预期奖励 $E_{y \sim \pi_{\theta}}[R(y, x)]$，同时加入一个 KL 散度正则项 $D_{KL}(\pi_\theta || \pi_{ref})$ 来防止策略过于集中。这个策略的问题上文已经探讨，即可能会导致策略熵崩塌的情况出现。但是在 OPD 的理论中，对于 KL，我们实际上是有选择的余地的——可以考虑在 FKL 和 RKL 之间的光谱上进行选择，甚至可以考虑其他的散度度量。实际上，在这里 RL 可以被容纳入 OPD 的框架中，成为 OPD 的一个特例。
+token 级损失目标：
 
-上述的散度度量方面的考察是 OPD 变体中一个重要轴线，而另一条轴线则是 Teacher 本身的更新。
+$$
+\mathcal{L}_{OPD}(\theta)=E_{x \sim D_x}\left[E_{y^S \sim \pi_\theta(\cdot|x)}\left[\frac{1}{|y^S|}\sum_t D_{KL}\left(\pi_T(\cdot|x, y_{<t}^S)\parallel \pi_\theta(\cdot|x, y_{<t}^S)\right)\right]\right]
+$$
+
+则该过程即为 OPD 的核心训练流程。
+
+显然，OPD 对于 teacher / student 的要求是，两者的词表必须一致。
+
+### PG OPD
+
+对于每个位置，我们可以计算 token 级的反向 KL 散度：
+
+$$
+r_{n} = \log \pi_T(y_n|x, y_{<n}) - \log \pi_\theta(y_n|x, y_{<n})
+$$
+
+对 $r_{n}$ 做 stop-gradient 后，我们可以将其作为一个隐式奖励，利用 REINFORCE 的策略梯度方法进行优化：
+
+$$
+L(\theta) = E_{y^S \sim \pi_\theta(\cdot|x)}\left[\frac{1}{|y^S|}\sum_n r_n \nabla_\theta \log \pi_\theta(y_n|x, y_{<n})\right]
+$$
+
+### 三种常见的 OPD 实现
+
+1. `Sampled-token OPD` 仅对学生采样的 1 个 token 计算损失：
+
+$$
+l_t^{sample} = \log p_t(\hat{y}_t) - \log q_t(\hat{y}_t)
+$$
+
+进行一次无偏估计 token 级反向 KL。
+
+2. `Full-vocab OPD` 整张词表计算 KL，最准确但容易导致显存爆炸 $O(BTV)$：
+
+$$
+l_t^{full} = \sum_{\nu \in \mathcal{V}} p_t(\nu) \log \frac{p_t(\nu)}{q_t(\nu)}
+$$
+
+3. `Top-k OPD` 仅在学生 Top-k 高概率 token 集合 $S_t$ 上计算：
+
+$$
+L^{top-k}=\mathbb{E}\left[\sum_t D_{KL}\left(\bar{p}_t^{(S_t)}\parallel \bar{q}_t^{(S_t)}\right)\right]
+$$
+
+可以平衡效率与精度。
+
+### 动态监测指标
+
+以下三个指标可以用于监测 OPD 训练过程中的动态变化，帮助我们更好地理解学生模型与教师模型之间的对齐情况。
+
+-   重叠率 Overlap Ratio
+
+$$
+\mathcal{M}_{overlap} = \mathbb{E}_t\left[\frac{ \lvert S_{\theta}^t\cap S_{T}^t \rvert}{k}\right]
+$$
+
+即在学生模型的 Top-k 集合与在教师模型的 Top-k 集合的交集占 k 的比例。越接近 1 对齐越好。
+
+-   重叠 Token 优势 Overlap-Token Advantage
+
+$$
+\mathcal{M}_{adv}=\mathbb{E}_t\left[\frac{1}{\lvert \cap \rvert}\sum_{\nu\in\cap} \bar{\pi}_{\theta}^t(\nu)(\log\bar{\pi}_{T}^t(\nu)-\log\bar{\pi}_{\theta}^t(\nu))\right]
+$$
+
+即在学生模型的 Top-k 集合与在教师模型的 Top-k 集合的交集内，计算 RKL。越接近 0 对齐越好。
+
+-   熵差距 Absolute Entropy Gap
+
+$$
+\Delta H_t=\lvert H(\pi_{\theta})-H(\pi_{T}) \rvert
+$$
+
+即衡量学生模型与教师模型的置信度与多样性差异。
+
+### OPD 变体的两条设计轴
+
+在 OPD 的基础上，研究者们提出了许多变体方法，这些变体主要集中在两个设计轴上：
+
+1. 教师模型的选择：教师模型可以是固定的、可以是 EMA 的、可以是同一个模型加 prompt 偏置的、可以是黑盒 API、可以是 rubric。而教师模型的选择会直接影响到学生模型的学习效果和泛化能力。因此，如何选择合适的教师模型是 OPD 研究中的一个重要问题。
+
+2. 散度的选择：散度可以是 reverse KL、forward KL、JS、token-level entropy 等。不同的散度选择会影响学生模型的学习策略和优化目标。因此，如何选择合适的散度是 OPD 研究中的另一个重要问题。
