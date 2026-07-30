@@ -1,112 +1,177 @@
 ---
 title: 从零开始的 Post Training 3：GRPO
 published: 2026-06-21
-description: 'Post Training 的入门学习笔记 GRPO 篇'
-image: ''
-tags: ['Deep_Learning', 'Post_Training', 'RL', 'RLHF', 'GRPO']
-category: 'Research'
+description: "Post Training 的入门学习笔记 GRPO 篇"
+image: ""
+tags: ["Deep_Learning", "Post_Training", "RL", "RLHF", "GRPO"]
+category: "Research"
 draft: false
-lang: ''
-series: 'Post Training'
+lang: ""
+series: "Post Training"
 ---
 
-# 从零开始的 Post Training 3
+# 从零开始的 Post Training 3：GRPO
 
 ## GRPO 算法
 
 ### 从 PPO 到 GRPO
 
-在 PPO 算法过程中，我们使用一个价值模型来估计状态的价值，从而计算优势函数 $A^\pi(s, a)$。然而，训练一个准确的价值模型可能会比较困难，并且有相当大的内存开销。GRPO（Group Relative Policy Optimization）算法认为，我们可以通过对于每个时间步的回报进行采样来直接估计优势函数，而不需要显式地训练一个价值模型。
+PPO 通常训练一个价值模型（Critic）来估计状态价值，再据此计算优势。这个价值模型会增加显存和计算开销，而且语言模型往往只在回答结束时得到结果奖励，要准确估计每个 token 位置的价值并不容易。
 
-回顾一下 PPO 算法的 LOSS 函数：
+GRPO（Group Relative Policy Optimization，组相对策略优化）保留 PPO 的概率比裁剪，但不再单独训练价值模型。它针对同一个问题采样一组回答，用组内平均奖励作为基线，判断每条回答相对同组回答表现得更好还是更差。需要注意，GRPO 省去的是价值模型，并没有省去奖励信号；奖励仍可来自规则验证器、奖励函数或奖励模型。
+
+为统一符号，本文使用：
+
+- 当前策略 $\pi_\theta$：正在更新的模型；
+- 旧策略 $\pi_{\mathrm{old}}$：生成当前训练数据的模型；
+- 参考策略 $\pi_{\mathrm{ref}}$：用于 KL 正则化的模型，通常在一个更新阶段内保持固定。
+
+对问题 $q$，旧策略采样 $G$ 条回答 $\{o_i\}_{i=1}^G$。记第 $i$ 条回答的长度为 $T_i=\lvert o_i\rvert$，并令
 
 $$
-L(\theta') = -\frac{1}{N} \sum_{i=1}^N \sum_t \min \left( \frac{\pi'(a_t|s_t)}{\pi(a_t|s_t)}, \text{clip}\left( \frac{\pi'(a_t|s_t)}{\pi(a_t|s_t)}, 1 - \epsilon, 1 + \epsilon \right) \right) A^{GAE}_\lambda(s_t, a_t)
+s_{i,t}=(q,o_{i,<t}),
+\qquad
+a_{i,t}=o_{i,t}.
 $$
 
-对于 GRPO 算法而言，我们不需要显式地训练一个价值模型来估计状态的价值，而是直接对于每个时间步的回报进行采样，从而得到优势函数的估计。
+当前策略与旧策略在已采样 token 上的概率比为：
 
-具体来说，GRPO 的 LOSS 函数为：
+$$
+\rho_{i,t}(\theta)
+=
+\frac{\pi_\theta(a_{i,t}\mid s_{i,t})}
+{\pi_{\mathrm{old}}(a_{i,t}\mid s_{i,t})}.
+$$
+
+GRPO 要最大化的目标可以写成：
 
 $$
 \begin{aligned}
-    \mathcal{J}_{GRPO}(\theta) &= \mathbb{E}{[q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(O|q)]}  \\
-    & \frac{1}{G}\sum_{i=1}^G\frac{1}{|o_i|} \sum_{t=1}^{|o_i|} \left\{ \min \left[ \frac{\pi_\theta(o_{i,t} | q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t} | q, o_{i,<t})} \hat{A}_{i,t}, \text{clip} \left( \frac{\pi_\theta(o_{i,t} | q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t} | q, o_{i,<t})}, 1 - \epsilon, 1 + \epsilon \right)  \hat{A}_{i,t} \right] - \beta \mathbb{D}_{KL}\left[\pi_{\theta} || \pi_{ref}\right]\right\} ,
+J_{\mathrm{GRPO}}(\theta)
+=
+E_{\substack{
+q\sim P(Q)\\
+\{o_i\}_{i=1}^G\sim\pi_{\mathrm{old}}(\cdot\mid q)
+}}
+\Bigg[
+\frac{1}{G}
+\sum_{i=1}^G
+\frac{1}{T_i}
+\sum_{t=1}^{T_i}
+\Big(&
+\min\big(
+\rho_{i,t}(\theta)\widehat A_{i,t},
+\operatorname{clip}(\rho_{i,t}(\theta),1-\epsilon,1+\epsilon)\widehat A_{i,t}
+\big)\\
+&-\beta\widehat D_{\mathrm{KL},i,t}
+\Big)
+\Bigg].
 \end{aligned}
 $$
 
-以上 LOSS 函数为 Deepseek 论文中的 LOSS 函数。PPO 算法的 LOSS 函数中，我们先对 N 条轨迹进行采样，然后对于每条轨迹中的每个时间步累加优势函数的估计。而 GRPO 算法的 LOSS 函数中，有一个外层的期望，表示对于每个问题 $q$，我们从旧策略 $\pi_{\theta_{old}}$ 中采样 $G$ 条轨迹 $\{o_i\}_{i=1}^G$，然后对于每条轨迹中的每个时间步累加优势函数的估计。也就是说，我们一共存在 $N \times G$ 条轨迹，每条轨迹中存在 $|o_i|$ 个时间步。
+其中，$\widehat A_{i,t}$ 是组相对优势估计，$\epsilon$ 控制概率比裁剪范围，$\beta$ 控制当前策略偏离参考策略的惩罚强度。训练代码通常最小化相反数 $L_{\mathrm{GRPO}}=-J_{\mathrm{GRPO}}$。
 
-如果将 GRPO 的 LOSS 函数修改为本文中 PPO 的 LOSS 函数的形式，则如下：
+如果一个小批量包含 $N$ 个问题，那么通常会得到 $N\times G$ 条回答。目标中的 $1/T_i$ 表示先对每条回答的有效 token 取平均，避免长回答仅仅因为 token 更多而占据更大的权重。和 PPO 一样，GRPO 仍是 PPO 风格的在策略方法：一批旧策略数据可以复用若干次，但策略更新后需要重新采样较新的回答。
 
-$$
-\begin{aligned}
-L(\theta) &= - \frac1N \sum_{j = 1}^N \left[ \frac{1}{G}\sum_{i=1}^G\frac{1}{\lvert s^i \rvert} \sum_t \left\{ \min \left[ \frac{\pi_\theta(a_t^i | s_t^i)}{\pi_{\theta_{old}}(a_t^i | s_t^i)} \hat{A}_{i,t}, \text{clip} \left( \frac{\pi_\theta(a_t^i | s_t^i)}{\pi_{\theta_{old}}(a_t^i | s_t^i)}, 1 - \epsilon, 1 + \epsilon \right)  \hat{A}_{i,t} \right] - \beta D_{KL}\left[\pi' || \pi \right]\right\} \right], \quad a_t^i \sim \pi(a_t^i|\theta)
-\end{aligned}
-$$
+### 组相对优势如何计算
 
-公式中的 $\lvert s^i \rvert$ 表示第 $i$ 条轨迹的长度，除去这一项可使得每条轨迹对于 LOSS 函数的贡献保持一致，避免因为轨迹长度不同而导致某些轨迹对于 LOSS 函数的贡献过大或过小。
-
-严格来说，上述公式中的 $a_t^i$ 和 $s_t^i$ 应该分别替换为 $a_t^{i, j}$ 和 $s_t^{i, j}$，为了简化表达，我们省略了这些索引。
-
-论文使用 Bregman 散度构造的无偏估计量来估算 $D_{KL}$：
+在结果监督下，先为同一问题的每条完整回答计算奖励 $r_i$。奖励可以来自答案是否正确等规则，也可以来自奖励模型。记组内均值和标准差为：
 
 $$
-D_{KL}(\pi' || \pi) = \frac{\pi(a_t^i | s_t^i)}{\pi'(a_t^i | s_t^i)} - \ln \frac{\pi(a_t^i | s_t^i)}{\pi'(a_t^i | s_t^i)} - 1
+\bar r
+=
+\frac{1}{G}\sum_{i=1}^G r_i,
+\qquad
+s_r
+=
+\sqrt{\frac{1}{G}\sum_{i=1}^G(r_i-\bar r)^2}.
 $$
 
-这个估计量是无偏的、恒非负，且方差较优。
-
-### 关于 $\hat{A}_{i,t}$ 的计算
-
-在 GRPO 算法中，我们直接对于每个轨迹的回报进行采样来估计优势函数 $\hat{A}_{i,t}$，而不需要显式地训练一个价值模型来估计状态的价值。
-
-具体的，对于每个问题 $q$，我们从旧策略 $\pi_{\theta_{old}}$ 中采样 $G$ 条轨迹 $\{a_i\}_{i=1}^G$，使用奖励模型来计算每条轨迹的回报 $R_i$，然后对于每个时间步 $t$，该时间步的优势函数 $\hat{A}_{i,t}$ 可以通过以下方式计算：
+优势估计为：
 
 $$
-\hat{A}_{i,t} = \frac{r_i - \text{mean}(\{r_1, r_2, \dots, r_G\})}{\text{std}(\{r_1, r_2, \dots, r_G\})}
+\widehat A_{i,t}
+=
+\frac{r_i-\bar r}{s_r+\varepsilon}.
 $$
 
-实际上，该 $\hat{A}_{i, t}$ 对于每个时间步 $t$ 来说都是相同的，因为我们直接使用了每条轨迹的回报 $R_i$ 来计算优势函数，而没有考虑时间步之间的差异。所以该项实际上可以提出求和符号之外（）（）（）
+$\varepsilon$ 是防止除以零的小常数。如果组内所有奖励完全相同，那么这些回答之间没有相对差异，实践中可以把优势置为 0 或跳过这一组。
 
-### 关于惩罚
+在结果监督下，同一条回答中的所有 token 共用同一个 $\widehat A_{i,t}$。因此，GRPO 提供的是“同一问题下不同回答之间”的相对信号，并没有自动判断一条回答中究竟哪个 token 导致了成败。概率比裁剪和 KL 惩罚仍按 token 计算，但这不等同于获得了 token 级奖励归因。
 
-注意到 PPO 算法中，每个时间步的回报函数其实有一项 KL 散度的惩罚项，即
+### KL 惩罚
 
-$$
-R_t = r_t - \beta D_{KL}(\pi' || \pi)
-$$
+GRPO 中有两种不同的策略比较，不能混淆：
 
-这里的 $r_t$ 是奖励模型的输出，而 $D_{KL}(\pi' || \pi)$ 是新旧策略之间的 KL 散度。GRPO 算法中，我们直接将 KL 散度的惩罚项加入到 LOSS 函数中，而不是加入到回报函数中。
+1. $\pi_\theta$ 与 $\pi_{\mathrm{old}}$ 的概率比用于 PPO 裁剪；
+2. $\pi_\theta$ 与 $\pi_{\mathrm{ref}}$ 的 KL 项用于限制模型偏离参考策略。
 
-### 关于过程监督与结果监督
-
-原论文中提到，GRPO 算法可以同时支持过程监督（Process Supervision）和结果监督（Outcome Supervision）。过程监督是指在训练过程中，我们对于每个时间步的回报进行监督，而结果监督是指在训练过程中，我们对于整个轨迹的回报进行监督。
-
-显然我们上文中提到的 GRPO 的 LOSS 函数是结果监督的形式，因为我们直接使用了每条轨迹的回报 $R_i$ 来计算优势函数 $\hat{A}_{i,t}$。如果我们想要实现过程监督的形式，我们使用过程奖励模型（Process Reward Model, PRM）对每条回复的每个推理步骤进行打分，而不是对每个 token 打分。具体来说，对于第 $i$ 条回复中第 $j$ 个推理步骤（结束于 token index $index(j)$），PRM 给出该步骤的奖励 $r_i^{index(j)}$。随后将所有 $G$ 条回复的所有步骤奖励放在一起做全局归一化：
+DeepSeekMath 使用下面的单 token 估计量：
 
 $$
-\tilde{r}_i^{index(j)} = \frac{r_i^{index(j)} - \text{mean}(\mathbf{R})}{\text{std}(\mathbf{R})}
+\widehat D_{\mathrm{KL},i,t}
+=
+\frac{\pi_{\mathrm{ref}}(a_{i,t}\mid s_{i,t})}
+{\pi_\theta(a_{i,t}\mid s_{i,t})}
+-
+\ln
+\frac{\pi_{\mathrm{ref}}(a_{i,t}\mid s_{i,t})}
+{\pi_\theta(a_{i,t}\mid s_{i,t})}
+-1.
 $$
 
-其中 $\mathbf{R}$ 是所有 $G$ 条回复中所有步骤奖励的集合。最终每个 token 的优势函数为之后所有步骤归一化奖励的累加：
+令概率比为 $u>0$，则 $u-\ln u-1\geq 0$，所以这个单样本估计量恒非负。当动作确实由当前策略采样，即 $a_{i,t}\sim\pi_\theta(\cdot\mid s_{i,t})$ 时，对它取期望正好得到
 
 $$
-\hat{A}_{i,t} = \sum_{index(j) \geq t} \tilde{r}_i^{index(j)}
+D_{KL}
+\left(
+\pi_\theta(\cdot\mid s_{i,t})
+\parallel
+\pi_{\mathrm{ref}}(\cdot\mid s_{i,t})
+\right).
 $$
+
+GRPO 实际使用旧策略采样的回答。因此，在一轮更新开始、$\pi_\theta=\pi_{\mathrm{old}}$ 时，上述无偏关系成立；经过多次参数更新后，如果仍复用同一批回答，它就是一个依赖“当前策略与旧策略仍然接近”的实用近似，而不能无条件称为无偏估计。
+
+### 结果监督与过程监督
+
+结果监督（outcome supervision）只在整条回答结束后给出奖励，前文的组相对优势就属于这种情况。
+
+过程监督（process supervision）则在若干推理步骤结束时给出奖励。过程奖励模型（Process Reward Model，PRM）评价的是一个推理步骤，而不是每个 token。把同一问题下各回答的步骤奖励汇总为集合 $\mathcal R$，可以先进行标准化：
+
+$$
+\widetilde r_{i,j}
+=
+\frac{r_{i,j}-\operatorname{mean}(\mathcal R)}
+{\operatorname{std}(\mathcal R)+\varepsilon}.
+$$
+
+若第 $i$ 条回答的第 $j$ 个步骤结束于位置 $b_{i,j}$，那么位置 $t$ 的优势可以写成之后各步骤标准化奖励之和：
+
+$$
+\widehat A_{i,t}
+=
+\sum_{j:\,b_{i,j}\geq t}
+\widetilde r_{i,j}.
+$$
+
+这样，较早的 token 会接收到后续多个步骤的反馈，比只使用最终结果更容易定位问题。不过，过程监督需要可靠的步骤划分和过程奖励，标注或训练成本通常也更高。
 
 ### GRPO 的优缺点
 
 #### 优点
 
-- 不需要显式地训练一个价值模型来估计状态的价值，从而减少了内存开销和训练难度。
-
-- 避免了由于价值模型估计不准确而导致的训练不稳定问题。
-
-- 有更强的探索能力。
+- 不需要单独训练价值模型，能够减少显存、计算和实现复杂度。
+- 避免了价值模型估计误差这一潜在的不稳定来源。
+- 同一问题内直接比较多条回答，适合可验证答案或成对比较较可靠的任务。
 
 #### 缺点
 
-- 计算复杂度高，有新的超参数。
+- 每个问题需要生成 $G$ 条回答，采样成本可能较高，组大小 $G$ 也需要调节。
+- 优势依赖有限的组内样本。组较小、奖励稀疏或组内方差很小时，信号可能噪声较大或直接消失。
+- 结果监督会把同一个优势分配给整条回答，无法直接完成细粒度的 token 级归因。
+- 组内相对奖励只说明一条回答比同组回答更好，不保证它在绝对意义上已经足够好，因此方法仍高度依赖奖励设计与采样质量。
 
-- 高方差，训练不稳定。GRPO 在进行重要性采样计算时是在 token 级别上进行的，而每个 token 只是采样了一次，若某一个 token 过于偏离组内平均值或原始策略，那么仅通过一次采样很难做到校正分布，需要多次采样。因此仅仅通过一次 token 采样会在训练过程中引入高方差的噪声，进而可能造成模型的梯度估计不稳定
+### 参考资料
+
+- [DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300)

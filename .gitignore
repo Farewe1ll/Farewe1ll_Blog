@@ -28,6 +28,7 @@ yarn.lock
 .vscode/
 .obsidian/
 .claudian/
+.claude/
 
 prompt.txt
 
