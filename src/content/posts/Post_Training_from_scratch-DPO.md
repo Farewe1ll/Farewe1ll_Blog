@@ -153,35 +153,72 @@ $$
 
 即我们希望最大化生成内容的奖励，同时最小化训练策略与参考策略之间的 KL 散度，以确保训练策略不会偏离参考策略太远。$\beta$ 较小时，模型更强调奖励，可能更容易偏离参考策略；$\beta$ 较大时，模型更新更保守。
 
-记上式方括号中的最大化目标为 $J(\pi_\theta)$。将它乘以负常数 $-1/\beta$，不会改变最优策略，只会把最大化问题改写成等价的最小化问题：
+记上式方括号中的最大化目标为 $J(\pi_\theta)$。将它乘以负常数 $-1/\beta$，不会改变最优策略，只会把最大化问题改写成等价的最小化问题。逐步展开：
 
 $$
+\begin{aligned}
 \arg\max_{\pi_\theta}J(\pi_\theta)
-=
+&=
+\arg\max_{\pi_\theta}
+E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
+\left[
+r(x,y)
+-
+\beta
+\ln\frac{\pi_\theta(y\mid x)}{\pi_{\mathrm{ref}}(y\mid x)}
+\right] \\
+&=
 \arg\min_{\pi_\theta}
 E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
 \left[
 \ln\frac{\pi_\theta(y\mid x)}{\pi_{\mathrm{ref}}(y\mid x)}
 -\frac{1}{\beta}r(x,y)
-\right].
-$$
-
-把奖励项移入对数，可以继续写成：
-
-$$
-\min_{\pi_\theta}
+\right] \\
+&=
+\arg\min_{\pi_\theta}
+E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
+\left[
+\ln\frac{\pi_\theta(y\mid x)}{\pi_{\mathrm{ref}}(y\mid x)}
+-
+\ln\exp\left(\frac{1}{\beta}r(x,y)\right)
+\right] \\
+&=
+\arg\min_{\pi_\theta}
 E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
 \left[
 \ln
 \frac{\pi_\theta(y\mid x)}
-{\pi_{\mathrm{ref}}(y\mid x)\exp(r(x,y)/\beta)}
+{\pi_{\mathrm{ref}}(y\mid x)\exp\left(r(x,y)/\beta\right)}
 \right]
+\end{aligned}
 $$
 
-在这里的 $Z(x)$ 是一个归一化常数，定义为：
+在这里引入 $Z(x)$ 是为了把分母归一化成一个合法的概率分布。由于 $Z(x)/Z(x)=1$，把它乘进分母不会改变对数里的值，但可以把分母拆成“归一化后的分布”和常数两项：
 
 $$
 Z(x)=\sum_{y'}\pi_{\mathrm{ref}}(y'\mid x)\exp\left(\frac{r(x,y')}{\beta}\right)
+$$
+
+于是
+
+$$
+\begin{aligned}
+& \min_{\pi_\theta}
+E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
+\left[
+\ln
+\frac{\pi_\theta(y\mid x)}
+{\pi_{\mathrm{ref}}(y\mid x)\exp\left(r(x,y)/\beta\right)\frac{1}{Z(x)}Z(x)}
+\right] \\
+=\;& \min_{\pi_\theta}
+E_{x\sim D,\,y\sim\pi_\theta(\cdot\mid x)}
+\left[
+\ln
+\frac{\pi_\theta(y\mid x)}
+{\frac{1}{Z(x)}\pi_{\mathrm{ref}}(y\mid x)\exp\left(r(x,y)/\beta\right)}
+-\ln Z(x)
+\right]
+\end{aligned}
 $$
 
 它用于将奖励加权后的参考策略归一化为概率分布。定义目标分布：
@@ -246,8 +283,27 @@ $$
 根据 Bradley-Terry 模型，我们需要比较偏好回答 $y_w$ 与非偏好回答 $y_l$ 的奖励差。将最优策略替换为待训练的参数化策略 $\pi_\theta$ 后，$\beta \ln Z(x)$ 会在奖励差中抵消，最终得到 DPO 损失：
 
 $$
+\begin{aligned}
 L_{\mathrm{DPO}}(\theta)
-=
+&=
+-E_{(x,y_w,y_l)\sim D}
+\left[
+\ln\sigma\left(
+r(x,y_w)-r(x,y_l)
+\right)
+\right] \\
+&=
+-E_{(x,y_w,y_l)\sim D}
+\left[
+\ln\sigma\left(
+\beta\ln\frac{\pi_\theta(y_w\mid x)}{\pi_{\mathrm{ref}}(y_w\mid x)}
++\beta\ln Z(x)
+-
+\beta\ln\frac{\pi_\theta(y_l\mid x)}{\pi_{\mathrm{ref}}(y_l\mid x)}
+-\beta\ln Z(x)
+\right)
+\right] \\
+&=
 -E_{(x,y_w,y_l)\sim D}
 \left[
 \ln\sigma\left(
@@ -255,6 +311,7 @@ L_{\mathrm{DPO}}(\theta)
 -\beta\ln\frac{\pi_\theta(y_l\mid x)}{\pi_{\mathrm{ref}}(y_l\mid x)}
 \right)
 \right]
+\end{aligned}
 $$
 
 其中，$y_w$ 表示数据中被选择的偏好回答，$y_l$ 表示被拒绝的非偏好回答。

@@ -106,6 +106,14 @@ GRPO 中有两种不同的策略比较，不能混淆：
 1. $\pi_\theta$ 与 $\pi_{\mathrm{old}}$ 的概率比用于 PPO 裁剪；
 2. $\pi_\theta$ 与 $\pi_{\mathrm{ref}}$ 的 KL 项用于限制模型偏离参考策略。
 
+在 PPO 中，每个时间步的回报里其实也有一项 KL 散度惩罚：
+
+$$
+R_t = r_t - \beta D_{KL}(\pi_\theta \parallel \pi_{\mathrm{ref}})
+$$
+
+这里的 $r_t$ 是奖励模型的输出，$D_{KL}(\pi_\theta \parallel \pi_{\mathrm{ref}})$ 是当前策略与参考策略之间的 KL 散度。而 GRPO 没有把 KL 惩罚塞进回报，而是直接把 KL 惩罚项加入 LOSS 函数，因此上文的 $J_{\mathrm{GRPO}}$ 中惩罚项独立于概率比裁剪项出现。
+
 DeepSeekMath 使用下面的单 token 估计量：
 
 $$
@@ -120,7 +128,7 @@ $$
 -1.
 $$
 
-令概率比为 $u>0$，则 $u-\ln u-1\geq 0$，所以这个单样本估计量恒非负。当动作确实由当前策略采样，即 $a_{i,t}\sim\pi_\theta(\cdot\mid s_{i,t})$ 时，对它取期望正好得到
+这个估计量来自 Bregman 散度展开。令概率比为 $u>0$，则 $u-\ln u-1\geq 0$，所以这个单样本估计量恒非负，并且方差较优。当动作确实由当前策略采样，即 $a_{i,t}\sim\pi_\theta(\cdot\mid s_{i,t})$ 时，对它取期望正好得到
 
 $$
 D_{KL}

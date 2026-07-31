@@ -132,6 +132,54 @@ $$
 
 其中 $\mathcal S$ 是问题与参考解答组成的数据集，$D$ 是选定的散度函数。论文主要实验令 $D$ 为正向 KL。
 
+梯度只回传给学生模型。记方括号中的蒸馏损失为 $\ell_\theta(\hat y)$，则完整目标为 $J(\theta)=E_{\hat y\sim p_S(\cdot\mid x)}[\ell_\theta(\hat y)]$。由于 $\theta$ 既决定采样出什么回答，也出现在损失内部，用对数求导技巧展开完整梯度：
+
+$$
+\begin{aligned}
+\nabla_\theta L(\theta)
+&=
+E_{(x,y^*)\sim\mathcal S}
+\left[
+\nabla_\theta
+E_{\hat y\sim p_S(\cdot\mid x)}
+\left[
+\ell_\theta(\hat y)
+\right]
+\right] \\
+&=
+E_{(x,y^*)\sim\mathcal S}
+\left[
+E_{\hat y\sim p_S(\cdot\mid x)}
+\left[
+\ell_\theta(\hat y)\nabla_\theta\ln p_S(\hat y\mid x)
++
+\nabla_\theta\ell_\theta(\hat y)
+\right]
+\right]
+\end{aligned}
+$$
+
+外层的 $E_{(x,y^*)\sim\mathcal S}$ 与 $\theta$ 无关，可以直接放入。完整梯度包含两部分：轨迹梯度（第一项，来自 $\hat y$ 对 $\theta$ 的采样依赖）与蒸馏梯度（第二项，来自散度本身对 $\theta$ 的依赖）。实际训练把采样得到的回答 $\hat y$ 视为固定数据，即对采样过程停止梯度，只保留蒸馏梯度：
+
+$$
+\nabla_\theta L(\theta)
+=
+E_{(x,y^*)\sim\mathcal S}
+\left[
+E_{\hat y\sim p_S(\cdot\mid x)}
+\left[
+\frac{1}{\lvert\hat y\rvert}
+\sum_{n=1}^{\lvert\hat y\rvert}
+\nabla_\theta
+D\left(
+p_T(\cdot\mid x,y^*,\hat y_{<n})
+\parallel
+p_S(\cdot\mid x,\hat y_{<n})
+\right)
+\right]
+\right]
+$$
+
 训练流程大致为：
 
 1. 学生自采样：学生只读取问题 $x$，生成回答 $\hat y$。

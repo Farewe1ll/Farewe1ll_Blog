@@ -121,7 +121,38 @@ D_{KL}
 \right]
 $$
 
-利用自回归分解，序列级 RKL 可以精确分解为 token 级 RKL 之和：
+利用自回归分解，序列级 RKL 可以精确分解为 token 级 RKL 之和。具体推导如下：将序列概率展开为逐 token 条件概率的乘积，对数化后，反向 KL 中的期望可以拆到每个时间步：
+
+$$
+\begin{aligned}
+D_{KL}\left(\pi_\theta(\cdot\mid x)\parallel\pi_T(\cdot\mid x)\right)
+&=
+E_{y^S \sim \pi_\theta(\cdot\mid x)}
+\left[
+\ln\frac{\pi_\theta(y^S\mid x)}{\pi_T(y^S\mid x)}
+\right] \\
+&=
+E_{y^S \sim \pi_\theta(\cdot\mid x)}
+\left[
+\sum_t
+\ln\frac{\pi_\theta(y_t\mid x,y_{<t}^S)}{\pi_T(y_t\mid x,y_{<t}^S)}
+\right] \\
+&=
+\sum_t
+E_{y^S_{\le t} \sim \pi_\theta(\cdot\mid x)}
+\left[
+\ln\frac{\pi_\theta(y_t\mid x,y_{<t}^S)}{\pi_T(y_t\mid x,y_{<t}^S)}
+\right] \\
+&=
+\sum_t
+E_{y_{<t}^S \sim \pi_\theta(\cdot\mid x)}
+\left[
+D_{KL}\left(\pi_\theta(\cdot\mid x,y_{<t}^S)\parallel\pi_T(\cdot\mid x,y_{<t}^S)\right)
+\right]
+\end{aligned}
+$$
+
+其中第 2 行到第 3 行利用期望的线性性，并把每个位置的期望退化为只与该项相关的前缀（即对前 $t$ 个 token 的边际分布求期望，记为 $y^S_{\le t}$）；最后一步使用期望的迭代性质，$E_{y^S_{\le t}}[\cdot]=E_{y^S_{<t}}[E_{y_t}[\cdot]]$：先对前缀 $y_{<t}^S$ 求期望，再在给定前缀下对 $y_t$ 求期望，内层期望恰好构成该前缀上的 token 级 RKL。于是 token 级损失目标为：
 
 $$
 L_{\mathrm{OPD}}(\theta)
@@ -141,7 +172,7 @@ D_{KL}
 \right]
 $$
 
-这里的求和包含 EOS，即回答结束标记对应的位置。实际训练常常再除以回答中的有效 token 数，避免较长回答仅仅因为 token 更多而产生过大的损失。不过，经过这种长度平均后，训练使用的是一个实用的代理目标（surrogate objective），不再严格等于上面的序列级 RKL。
+这里的求和包含 EOS，即回答结束标记对应的位置。实际训练常常再除以回答中的有效 token 数，即目标中的 $\sum_t$ 换成 $\frac{1}{\lvert y^S\rvert}\sum_t$，避免较长回答仅仅因为 token 更多而产生过大的损失。不过，经过这种长度平均后，训练使用的是一个实用的代理目标（surrogate objective），不再严格等于上面的序列级 RKL。
 
 上述逐 token 比较要求教师和学生采用相同的词表，并且以相同方式切分文本，否则双方的“第一个 token”可能并不对应。OPD 在理论上并不强制教师和学生使用相同词表，但如果词表不同，就需要先建立 token 之间的对应关系，或者改为直接比较整段文本，不能原样使用上面的公式。
 

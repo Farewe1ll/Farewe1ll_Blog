@@ -141,6 +141,17 @@ $$
 
 其中 $Z(x)$ 是归一化常数。“奖励倾斜”可以直观理解为：先保留当前策略的基本分布，再按奖励对不同回答重新加权。
 
+不过这里存在一个问题：我们无法直接计算 $\pi_{k+1}^{*}(y\mid x)$，因为归一化常数
+
+$$
+Z(x) = \sum_{y'} \pi_k(y'\mid x) \exp\!\left(\frac{r(y',x)}{\beta}\right)
+$$
+
+需要对所有可能的回答求和，通常不可行。因此 RL 往往参数化一个近似的策略 $\pi_\theta$ 来逼近 $\pi_{k+1}^{*}$。那么应当用 FKL 还是 RKL 来度量 $\pi_\theta$ 与 $\pi_{k+1}^{*}$ 之间的距离？
+
+- 若是 FKL，我们需要在 $\pi_{k+1}^{*}$ 上取期望，这就要求能够从 $\pi_{k+1}^{*}$ 中采样或计算其概率；即使借助重要性采样等近似方法，计算量仍然过大。
+- 若是 RKL，我们只需要在 $\pi_\theta$ 上取期望，这是容易实现的。这正是此前诸多 RL 方法的核心思想。
+
 反过来整理可得：
 
 $$
@@ -180,6 +191,31 @@ r(y,x,c)
 $$
 
 在只关心更新方向时，可以忽略正的整体缩放和与回答 $y$ 无关的常数。于是，一个 token 的直观奖励就是“教师对它的对数概率减去学生对它的对数概率”：教师比学生更认可该选择时，奖励为正；反之则为负。
+
+基于该隐式奖励，我们可以得到第 $k$ 轮的策略梯度：
+
+$$
+\nabla_\theta J(\pi_{k})
+=
+E_{y \sim \pi_{k}(\cdot\mid x)}
+\left[
+\left(
+\ln \frac{\pi_{\phi_k}(y\mid x,c)}{\pi_k(y\mid x)}
+\right)
+\nabla_\theta \ln \pi_k(y\mid x)
+\right]
+$$
+
+另一方面，RL/OPD 一类的优化目标是最小化当前策略与最优策略之间的反向 KL：
+
+$$
+\begin{aligned}
+\theta^* &= \arg\min_{\theta} D_{KL}(\pi_\theta(\cdot\mid x) \parallel \pi_{k+1}^{*}(\cdot\mid x)) \\
+&= \arg\min_{\theta} E_{y \sim \pi_\theta} \left[ \ln \frac{\pi_\theta(y\mid x)}{\pi_{k+1}^{*}(y\mid x)} \right]
+\end{aligned}
+$$
+
+对反向 KL 求梯度并用对数求导技巧展开：$\nabla_\theta D_{KL}(\pi_\theta\parallel\pi_{k+1}^{*}) = E_{y\sim\pi_\theta}[\ln\frac{\pi_\theta(y\mid x)}{\pi_{k+1}^{*}(y\mid x)}\nabla_\theta\ln\pi_\theta(y\mid x)] + E_{y\sim\pi_\theta}[\nabla_\theta\ln\frac{\pi_\theta(y\mid x)}{\pi_{k+1}^{*}(y\mid x)}]$。第二项中 $E_{y\sim\pi_\theta}[\nabla_\theta\ln\pi_\theta(y\mid x)]=\sum_y\nabla_\theta\pi_\theta(y\mid x)=0$（因为 $\sum_y\pi_\theta(y\mid x)=1$），而 $\pi_{k+1}^{*}$ 与 $\theta$ 无关，故第二项整体为零。代入 $\pi_\theta=\pi_k$、$\pi_{k+1}^{*}\approx\pi_{\phi_k}$ 后可以发现：最小化反向 KL 的梯度与最大化上述隐式奖励的策略梯度在期望上是等价的。
 
 在教师分布固定、并从当前策略处计算梯度的条件下，最大化这个隐式奖励的策略梯度与最小化下式的梯度方向一致：
 
@@ -239,14 +275,51 @@ D_{KL}(p\parallel q)
 p(v)\ln\frac{p(v)}{q(v)}
 $$
 
-如果教师在当前优化步中保持冻结，那么：
+如果教师在当前优化步中保持冻结（$\nabla_\theta \ln q(v) = 0$），我们可以展开反向 KL 的梯度。先对第一项求梯度，利用乘积法则：
+
+$$
+\begin{aligned}
+\nabla_\theta \sum_{v \in \mathcal V} p(v) \ln p(v)
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta p(v) \right] \ln p(v) + \sum_{v \in \mathcal V} p(v) \nabla_\theta \ln p(v) \\
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta p(v) \right] \ln p(v) + \sum_{v \in \mathcal V} p(v) \frac{\nabla_\theta p(v)}{p(v)} \\
+&= \sum_{v \in \mathcal V} \left[ \nabla_\theta p(v) \right] \ln p(v) + \sum_{v \in \mathcal V} \nabla_\theta p(v)
+\end{aligned}
+$$
+
+由于 $p$ 是概率分布，$\sum_{v \in \mathcal V} p(v) = 1$，故第二项
+
+$$
+\sum_{v \in \mathcal V} \nabla_\theta p(v) = \nabla_\theta \sum_{v \in \mathcal V} p(v) = 0
+$$
+
+于是第一项化简为：
+
+$$
+\nabla_\theta \sum_{v \in \mathcal V} p(v) \ln p(v)
+=
+\sum_{v \in \mathcal V} \left[ \nabla_\theta p(v) \right] \ln p(v)
+$$
+
+再处理第二项。由于教师分布 $q$ 与 $\theta$ 无关，$\nabla_\theta \ln q(v) = 0$，故：
+
+$$
+\nabla_\theta \sum_{v \in \mathcal V} p(v) \ln q(v)
+=
+\sum_{v \in \mathcal V} \left[ \nabla_\theta p(v) \right] \ln q(v)
+$$
+
+合并两项，得到：
 
 $$
 \begin{aligned}
 \nabla_\theta D_{KL}(p\parallel q)
 &=
 \sum_{v\in\mathcal V}
-\ln\frac{p(v)}{q(v)}
+\left[ \nabla_\theta p(v) \right]
+\left[ \ln p(v) - \ln q(v) \right] \\
+&=
+\sum_{v\in\mathcal V}
+\ln \frac{p(v)}{q(v)}
 \nabla_\theta p(v) \\
 &=
 \sum_{v\in\mathcal V}
